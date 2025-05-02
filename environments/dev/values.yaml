@@ -1,0 +1,24 @@
+---
+# Helm values for Jenkins in the dev environment (local k3d cluster)
+# Enables JCasC, disables the default config, and prepares for external config
+# injection.
+
+# The 'controller' section configures the Jenkins controller behavior
+controller:
+
+  # List of plugins to pre-install.
+  # Leave empty during scaffolding; will be populated later.
+  installPlugins: []
+
+  # Jenkins Configuration as Code (JCasC) settings
+  JCasC:
+
+    # Enable JCasC support in the Helm chart
+    enabled: true
+
+    # Disable default JCasC config provided by the chart
+    defaultConfig: false
+
+    # Placeholder for inline config scripts.
+    # We rely on mounted files via InitContainer instead.
+    configScripts: {}
