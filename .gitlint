@@ -6,7 +6,7 @@ contrib=contrib-title-conventional-commits
 line-length=72
 
 [title-match-regex]
-regex=^(feat|fix|docs|style|refactor|perf|test|chore)(\([^\)]+\))?: .+
+regex=^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\([^\)]+\))?: .+
 
 [body-max-line-length]
 line-length=100
