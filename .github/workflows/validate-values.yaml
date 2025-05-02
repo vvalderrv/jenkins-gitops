@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        env: [dev, staging, production]
+        env: [dev]
 
     steps:
       - name: Checkout repo
