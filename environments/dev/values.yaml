@@ -1,5 +1,5 @@
 ---
-# Helm values for Jenkins in the dev environment (local k3d cluster)
+# Helm values for Jenkins in the dev environment
 # Enables JCasC, disables the default config, and prepares for external config
 # injection.
 
