@@ -1,5 +1,5 @@
 ---
-name: Validate Helm Charts and Values (all environments)
+name: Validate Helm Charts and Values
 
 "on":
   push:
