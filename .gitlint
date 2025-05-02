@@ -1,0 +1,12 @@
+[general]
+ignore=body-is-missing
+contrib=contrib-title-conventional-commits
+
+[title-max-length]
+line-length=72
+
+[title-match-regex]
+regex=^(feat|fix|docs|style|refactor|perf|test|chore)(\([^\)]+\))?: .+
+
+[body-max-line-length]
+line-length=100
