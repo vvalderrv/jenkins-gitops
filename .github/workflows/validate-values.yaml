@@ -1,0 +1,38 @@
+---
+name: Validate Helm Charts and Values (all environments)
+
+"on":
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  helm-validate:
+    name: Validate Helm - ${{ matrix.env }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, staging, production]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.2
+
+      - name: Lint Helm chart
+        run: helm lint base/jenkins
+
+      - name: Template with values.yaml (${{ matrix.env }})
+        run: |
+          helm template jenkins base/jenkins \
+            -f environments/${{ matrix.env }}/values.yaml > rendered-${{ matrix.env }}.yaml
+
+      - name: Show rendered output
+        run: cat rendered-${{ matrix.env }}.yaml
