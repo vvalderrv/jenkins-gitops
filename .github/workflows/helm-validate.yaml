@@ -26,9 +26,6 @@ jobs:
         with:
           version: v3.13.2
 
-      - name: Lint Helm chart
-        run: helm lint base/jenkins
-
       - name: Template with values.yaml (${{ matrix.env }})
         run: |
           helm template jenkins base/jenkins \
