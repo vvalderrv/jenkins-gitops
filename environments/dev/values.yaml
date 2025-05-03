@@ -1,38 +1,100 @@
 ---
 # Helm values for Jenkins in the dev environment (local k3d cluster)
-# This file enables JCasC, disables the default config, and prepares for external config injection.
 
-# The 'controller' section configures the Jenkins controller behavior
 controller:
 
-  # Use custom Jenkins image built locally
   image:
     repository: jenkins-custom
     tag: latest
     pullPolicy: Never
 
-  # List of plugins to pre-install.
-  # Leave empty during scaffolding; will be populated later.
-  installPlugins: []
+  installPlugins:
+    - durable-task:577.v2a_8a_4b_7c0247
+    - ace-editor
+    - adoptopenjdk
+    - ansicolor
+    - audit-trail
+    - aws-credentials
+    - aws-java-sdk-cloudformation
+    - aws-secrets-manager-credentials-provider
+    - build-timeout
+    - build-timestamp
+    - build-with-parameters
+    - cloudbees-folder
+    - configuration-as-code
+    - description-setter
+    - disable-github-multibranch-status
+    - docker-custom-build-environment
+    - docker-workflow
+    - ec2
+    - email-ext
+    - environment-script
+    - extensible-choice-parameter
+    - external-monitor-job
+    - generic-webhook-trigger
+    # - ghprb
+    - git-parameter
+    - gradle
+    - handlebars
+    - hidden-parameter
+    - ivy
+    - jdk-tool
+    - job-dsl
+    - job-restrictions
+    - jobConfigHistory
+    - ldap
+    - lockable-resources
+    - login-theme
+    - managed-scripts
+    - nodelabelparameter
+    - nvm-wrapper
+    - oic-auth
+    # - ownership
+    - pam-auth
+    - parameterized-scheduler
+    - pipeline-aws
+    - pipeline-github-lib
+    - pipeline-stage-view
+    - postbuild-task
+    - postbuildscript
+    - powershell
+    - preSCMbuildstep
+    - project-description-setter
+    - python
+    # - readonly-parameters
+    - rebuild
+    - role-strategy
+    - s3
+    - saml
+    - simple-theme-plugin
+    - ssh-slaves
+    - sshd:3.237.v883d165a_c1d3
+    - strict-crumb-issuer
+    - support-core
+    - throttle-concurrents
+    - timestamper
+    - uno-choice
+    - validating-string-parameter
+    - workflow-api
+    - workflow-aggregator
+    - workflow-basic-steps
+    - workflow-step-api
+    - ws-cleanup
+    - job-import-plugin
+    - workflow-multibranch
+    - pipeline-utility-steps
+    - blueocean
+    - github-oauth
 
-  # Jenkins Configuration as Code (JCasC) settings
   JCasC:
-    # Enable JCasC support in the Helm chart
     enabled: true
-
-    # Disable default JCasC config provided by the chart
     defaultConfig: false
-
-    # Placeholder for inline config scripts.
-    # We rely on mounted files via InitContainer instead.
     configScripts: {}
 
-  # Define shared volumes for InitContainer and Jenkins controller
   volumes:
     - name: jcasc
       emptyDir: {}
 
-  # InitContainer to copy JCasC files into a shared volume
   initContainers:
     - name: jcasc-init
       image: jenkins-custom:latest
@@ -42,7 +104,6 @@ controller:
         - name: jcasc
           mountPath: /workspace/jcasc
 
-  # Kubernetes service to expose Jenkins
   service:
     enabled: true
     type: ClusterIP
