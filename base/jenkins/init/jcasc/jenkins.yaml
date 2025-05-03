@@ -1,1 +1,7 @@
-# Placeholder JCasC config
+jenkins:
+  systemMessage: "Welcome to Jenkins!"
+  numExecutors: 2
+  mode: NORMAL
+  scmCheckoutRetryCount: 3
+
+# Additional configuration options can go here.
