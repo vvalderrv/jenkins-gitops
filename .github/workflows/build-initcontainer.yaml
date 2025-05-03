@@ -1,13 +1,16 @@
----
 name: Build InitContainer Image
 
-"on":
+on:
   push:
     branches:
       - master
+    paths:
+      - 'base/jenkins/init/**'
   pull_request:
     branches:
       - master
+    paths:
+      - 'base/jenkins/init/**'
 
 jobs:
   build-init:
