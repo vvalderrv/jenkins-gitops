@@ -7,6 +7,7 @@ tmpcharts/
 *.log
 *.out
 *.pid
+rendered.*
 
 # Editor and system files
 .DS_Store
