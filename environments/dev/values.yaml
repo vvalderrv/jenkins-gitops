@@ -1,49 +1,32 @@
----
-# Helm values for Jenkins in the dev environment (local k3d cluster)
-# This file enables JCasC, disables the default config, and prepares for external config injection.
-
-# The 'controller' section configures the Jenkins controller behavior
 controller:
-
-  # Use custom Jenkins image built locally
-  image:
-    repository: jenkins-custom
-    tag: latest
-    pullPolicy: Never
-
-  # List of plugins to pre-install.
-  # Leave empty during scaffolding; will be populated later.
-  installPlugins: []
-
-  # Jenkins Configuration as Code (JCasC) settings
-  JCasC:
-    # Enable JCasC support in the Helm chart
-    enabled: true
-
-    # Disable default JCasC config provided by the chart
-    defaultConfig: false
-
-    # Placeholder for inline config scripts.
-    # We rely on mounted files via InitContainer instead.
-    configScripts: {}
-
-  # Define shared volumes for InitContainer and Jenkins controller
-  volumes:
-    - name: jcasc
-      emptyDir: {}
-
-  # InitContainer to copy JCasC files into a shared volume
   initContainers:
     - name: jcasc-init
       image: jenkins-custom:latest
-      imagePullPolicy: Never
-      command: ["/entrypoint.sh"]
+      command: ["/usr/share/jenkins/ref/bin/entrypoint.sh"]
       volumeMounts:
         - name: jcasc
           mountPath: /workspace/jcasc
+    - name: plugin-init
+      image: jenkins-custom:latest
+      command: ["/bin/sh", "/usr/share/jenkins/ref/bin/plugin-entrypoint.sh"]
+      volumeMounts:
+        - name: plugin-config
+          mountPath: /workspace/config
+        - name: plugins
+          mountPath: /workspace/plugins
 
-  # Kubernetes service to expose Jenkins
-  service:
-    enabled: true
-    type: ClusterIP
-    port: 8080
+  volumes:
+    - name: jcasc
+      emptyDir: {}
+    - name: plugins
+      emptyDir: {}
+    - name: plugin-config
+      configMap:
+        name: jenkins-plugin-config-dev
+
+  container:
+    volumeMounts:
+      - name: jcasc
+        mountPath: /var/jenkins_home/casc_configs
+      - name: plugins
+        mountPath: /var/jenkins_home/plugins
