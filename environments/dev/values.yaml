@@ -5,6 +5,12 @@
 # The 'controller' section configures the Jenkins controller behavior
 controller:
 
+  # Use custom Jenkins image built locally
+  image:
+    repository: jenkins-custom
+    tag: latest
+    pullPolicy: Never
+
   # List of plugins to pre-install.
   # Leave empty during scaffolding; will be populated later.
   installPlugins: []
@@ -29,7 +35,8 @@ controller:
   # InitContainer to copy JCasC files into a shared volume
   initContainers:
     - name: jcasc-init
-      image: alpine:3.18
+      image: jenkins-custom:latest
+      imagePullPolicy: Never
       command: ["/entrypoint.sh"]
       volumeMounts:
         - name: jcasc
