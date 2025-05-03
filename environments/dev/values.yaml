@@ -41,3 +41,9 @@ controller:
       volumeMounts:
         - name: jcasc
           mountPath: /workspace/jcasc
+
+  # Kubernetes service to expose Jenkins
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8080
