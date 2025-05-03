@@ -36,3 +36,8 @@ jobs:
 
       - name: Show rendered output
         run: cat rendered-${{ matrix.env }}.yaml
+
+      - name: Validate rendered manifest with kubeconform
+        run: |
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          ./kubeconform -strict -summary rendered-${{ matrix.env }}.yaml
