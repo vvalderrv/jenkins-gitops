@@ -9,8 +9,8 @@ LABEL description="InitContainer for injecting JCasC configs into Jenkins"
 RUN apk add --no-cache bash
 
 # Copy entrypoint and config files
-COPY entrypoint.sh /entrypoint.sh
-COPY jcasc/ /jcasc/
+COPY ./base/jenkins/init/entrypoint.sh /entrypoint.sh
+COPY ./base/jenkins/init/jcasc /jcasc/
 
 # Execute entrypoint on container start
 ENTRYPOINT ["/entrypoint.sh"]
