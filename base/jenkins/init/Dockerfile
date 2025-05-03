@@ -1,16 +1,13 @@
-# InitContainer image to inject JCasC configs into Jenkins PVC
+FROM jenkins/jenkins:lts
 
-FROM alpine:3.18
+USER root
 
-LABEL maintainer="LFIT"
-LABEL description="InitContainer for injecting JCasC configs into Jenkins"
+RUN mkdir -p /usr/share/jenkins/ref/bin
 
-# Install bash for scripting
-RUN apk add --no-cache bash
+COPY entrypoint.sh /usr/share/jenkins/ref/bin/entrypoint.sh
+COPY plugin-entrypoint.sh /usr/share/jenkins/ref/bin/plugin-entrypoint.sh
 
-# Copy entrypoint and config files
-COPY ./base/jenkins/init/entrypoint.sh /entrypoint.sh
-COPY ./base/jenkins/init/jcasc /jcasc/
+RUN chmod +x /usr/share/jenkins/ref/bin/entrypoint.sh \
+    && chmod +x /usr/share/jenkins/ref/bin/plugin-entrypoint.sh
 
-# Execute entrypoint on container start
-ENTRYPOINT ["/entrypoint.sh"]
+USER jenkins
