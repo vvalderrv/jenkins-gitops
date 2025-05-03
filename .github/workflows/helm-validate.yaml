@@ -1,13 +1,18 @@
----
 name: Validate Helm Charts and Values
 
-"on":
+on:
   push:
     branches:
       - master
+    paths:
+      - 'base/jenkins/**'
+      - 'environments/**'
   pull_request:
     branches:
       - master
+    paths:
+      - 'base/jenkins/**'
+      - 'environments/**'
 
 jobs:
   helm-validate:
