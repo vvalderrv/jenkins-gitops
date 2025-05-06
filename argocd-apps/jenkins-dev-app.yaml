@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/lfit/jenkins-gitops
-    targetRevision: HEAD
+    targetRevision: master
     path: base/jenkins
     helm:
       valueFiles:
