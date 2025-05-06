@@ -30,3 +30,6 @@ controller:
         mountPath: /var/jenkins_home/casc_configs
       - name: plugins
         mountPath: /var/jenkins_home/plugins
+
+  serviceAccount:
+    create: true
