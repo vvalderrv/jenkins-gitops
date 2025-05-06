@@ -1,2 +1,4 @@
+jenkinsImage: "myjenkins-custom:0.1-dev"
+
 serviceAccount:
   create: true
