@@ -8,10 +8,10 @@ spec:
   source:
     repoURL: https://github.com/lfit/jenkins-gitops
     targetRevision: HEAD
-    path: dev
+    path: base/jenkins
     helm:
       valueFiles:
-        - values.yaml
+        - ../../dev/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: jenkins-dev
