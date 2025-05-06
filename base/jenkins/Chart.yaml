@@ -1,6 +1,6 @@
 apiVersion: v2
 name: jenkins
-description: A minimal Helm chart for Jenkins
+description: A Helm chart for deploying Jenkins with a JCasC sidecar
 type: application
 version: 0.1.0
-appVersion: "2.414.3"
+appVersion: "lts"
