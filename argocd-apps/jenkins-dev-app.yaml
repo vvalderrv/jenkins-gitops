@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: jenkins-dev
   namespace: argocd
+  annotations:
+    force-refresh: "true"
 spec:
   project: default
   source:
