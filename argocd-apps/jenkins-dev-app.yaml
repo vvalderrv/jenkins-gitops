@@ -10,8 +10,9 @@ spec:
     targetRevision: HEAD
     path: base/jenkins
     helm:
-      valueFiles:
-        - ../../dev/values.yaml
+      parameters:
+        - name: serviceAccount.create
+          value: "true"
   destination:
     server: https://kubernetes.default.svc
     namespace: jenkins-dev
