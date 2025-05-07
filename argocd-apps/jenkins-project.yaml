@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: jenkins
+  namespace: argocd
+spec:
+  description: Jenkins Project
+  sourceRepos:
+  - https://github.com/lfit/jenkins-gitops
+  - https://github.com/lfit/ciman-gitops
+  - https://github.com/lfit/releng-global-jjb
+  destinations:
+  - namespace: jenkins-dev
+    server: https://kubernetes.default.svc
+  - namespace: jenkins-staging
+    server: '*'
+  - namespace: jenkins-prod
+    server: '*'
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
