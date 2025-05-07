@@ -10,6 +10,8 @@ spec:
   - https://github.com/lfit/ciman-gitops
   - https://github.com/lfit/releng-global-jjb
   destinations:
+  - namespace: argocd
+    server: https://kubernetes.default.svc
   - namespace: jenkins-dev
     server: https://kubernetes.default.svc
   - namespace: jenkins-staging
