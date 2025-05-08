@@ -6,10 +6,12 @@ metadata:
 spec:
   description: Jenkins Project
   sourceRepos:
-  - https://github.com/lfit/jenkins-gitops
-  - https://github.com/lfit/ciman-gitops
+  - https://github.com/vvalderrv/jenkins-gitops
+  - https://github.com/vvalderrv/ciman-gitops
   - https://github.com/lfit/releng-global-jjb
   destinations:
+  - namespace: argocd
+    server: https://kubernetes.default.svc
   - namespace: jenkins-dev
     server: https://kubernetes.default.svc
   - namespace: jenkins-staging
