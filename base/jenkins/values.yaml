@@ -1,5 +1,8 @@
 jenkinsImage: "jenkins/jenkins:lts-jdk11"
-sidecarImage: "ubuntu:latest"
+sidecarImage: "jenkins-jcasc-sidecar:0.1-dev"
 persistence:
   enabled: true
   size: 8Gi
+serviceAccount:
+  create: true
+  name: ""
