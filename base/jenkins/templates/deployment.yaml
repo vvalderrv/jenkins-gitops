@@ -28,8 +28,6 @@ spec:
         {{- end }}
         - name: jcasc-config
           emptyDir: {}
-        - name: scripts
-          emptyDir: {}
       containers:
         - name: jenkins
           image: "{{ .Values.jenkinsImage }}"
@@ -46,16 +44,3 @@ spec:
               mountPath: /var/jenkins_home
             - name: jcasc-config
               mountPath: /var/jenkins_home/casc.d
-        - name: jcasc-sidecar
-          image: "{{ .Values.sidecarImage }}"
-          imagePullPolicy: IfNotPresent
-          command: ["/bin/sh", "-c"]
-          args:
-            - >
-              echo "Sidecar started. Implement script cloning, cron, and reload logic here.";
-              sleep infinity;
-          volumeMounts:
-            - name: jcasc-config
-              mountPath: /var/jenkins_home/casc.d
-            - name: scripts
-              mountPath: /scripts
