@@ -1,5 +1,4 @@
 jenkinsImage: "jenkins/jenkins:lts-jdk11"
-sidecarImage: "jenkins-jcasc-sidecar:0.1-dev"
 persistence:
   enabled: true
   size: 8Gi
