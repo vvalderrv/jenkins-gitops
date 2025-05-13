@@ -1,3 +1,4 @@
+# templates/deployment.yaml
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -9,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{.Release.Name}}
     app.kubernetes.io/managed-by: {{.Release.Service}}
 spec:
-  replicas: 1  # Jenkins typically runs as a single instance
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: {{include "jenkins.name" .}}
@@ -19,6 +20,9 @@ spec:
       labels:
         app.kubernetes.io/name: {{include "jenkins.name" .}}
         app.kubernetes.io/instance: {{.Release.Name}}
+      # annotations:
+      #   prometheus.io/scrape: "true"
+      #   prometheus.io/port: "8080"
     spec:
       serviceAccountName: {{template "jenkins.serviceAccountName" .}}
       initContainers:
@@ -47,15 +51,22 @@ spec:
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home
+            - name: jcasc-config-volume
+              mountPath: /var/jenkins_home/casc_config
+              readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: jenkins-home
           persistentVolumeClaim:
-            claimName: {{template "jenkins.fullname" .}}
+            claimName: {{template "jenkins.fullname" .}}-home
         - name: jcasc-config-volume
           configMap:
             name: {{template "jenkins.fullname" .}}-jcasc-config
+            # Optional: Specify items if you only want specific files
+            # items: # This key itself is now commented
+            #   - key: 00-main.yaml
+            #     path: 00-main.yaml
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
