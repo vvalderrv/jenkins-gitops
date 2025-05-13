@@ -1,46 +1,70 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "jenkins.fullname" . }}
+  name: {{template "jenkins.fullname" .}}
   labels:
-    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{include "jenkins.name" .}}
+    helm.sh/chart: {{include "jenkins.chart" .}}
+    app.kubernetes.io/instance: {{.Release.Name}}
+    app.kubernetes.io/managed-by: {{.Release.Service}}
 spec:
-  replicas: 1
+  replicas: 1  # Jenkins typically runs as a single instance
   selector:
     matchLabels:
-      {{- include "jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{include "jenkins.name" .}}
+      app.kubernetes.io/instance: {{.Release.Name}}
   template:
     metadata:
       labels:
-        {{- include "jenkins.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: {{include "jenkins.name" .}}
+        app.kubernetes.io/instance: {{.Release.Name}}
     spec:
-      serviceAccountName: {{ include "jenkins.serviceAccountName" . }}
-      terminationGracePeriodSeconds: 60
-      securityContext:
-        fsGroup: 1000
-      volumes:
-        - name: jenkins-home
-        {{- if .Values.persistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ include "jenkins.fullname" . }}-home
-        {{- else }}
-          emptyDir: {}
-        {{- end }}
-        - name: jcasc-config
-          emptyDir: {}
+      serviceAccountName: {{template "jenkins.serviceAccountName" .}}
+      initContainers:
+        - name: volume-permissions
+          image: busybox:latest
+          command: ["sh", "-c", "chown -R 1000:1000 /var/jenkins_home"]
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
       containers:
-        - name: jenkins
-          image: "{{ .Values.jenkinsImage }}"
-          imagePullPolicy: IfNotPresent
+        - name: {{.Chart.Name}}
+          image: "{{.Values.jenkinsImage}}:{{.Values.jenkinsImageTag | default .Chart.AppVersion}}"
+          imagePullPolicy: {{.Values.jenkinsImagePullPolicy}}
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-            - name: agent
+            - name: jnlp
               containerPort: 50000
               protocol: TCP
+          env:
+            - name: JENKINS_HOME
+              value: /var/jenkins_home
+            - name: JAVA_OPTS
+              value: {{.Values.jenkinsJavaOpts | quote}}
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home
-            - name: jcasc-config
-              mountPath: /var/jenkins_home/casc.d
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: {{template "jenkins.fullname" .}}
+        - name: jcasc-config-volume
+          configMap:
+            name: {{template "jenkins.fullname" .}}-jcasc-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
