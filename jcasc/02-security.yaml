@@ -1,3 +1,12 @@
 # jcasc/02-security.yaml
-# Placeholder for Jenkins security realm and authorization
-# strategy configurations.
+---
+jenkins:
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "{{ .Values.jenkinsSecurity.adminPassword | default \"{AQAAABAAAAAQplaceholderhash...}\" }}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
