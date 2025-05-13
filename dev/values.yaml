@@ -2,17 +2,14 @@
 # Helm values for the Development Jenkins environment.
 
 # Jenkins master image configuration
-# These values are used by the deployment.yaml to specify the Jenkins image.
 jenkinsImage: "myjenkins-custom"
-jenkinsImageTag: "0.1-dev" # Or your specific development tag
-jenkinsImagePullPolicy: IfNotPresent # Or Always if you rebuild often with the same tag
+jenkinsImageTag: "0.1-dev"
+jenkinsImagePullPolicy: IfNotPresent
 
 # Jenkins master JVM options
-# Passed to the Jenkins master process.
-jenkinsJavaOpts: "-Xms512m -Xmx1024m" # Adjust as needed for your dev environment
+jenkinsJavaOpts: "-Xms512m -Xmx1024m"
 
-# Optional: Define resource requests and limits for the Jenkins master pod
-# These are standard Kubernetes resource definitions.
+# Optional: Define resource requests and limits
 # resources:
 #   requests:
 #     cpu: "500m"
@@ -22,61 +19,37 @@ jenkinsJavaOpts: "-Xms512m -Xmx1024m" # Adjust as needed for your dev environmen
 #     memory: "2Gi"
 
 # JCasC core Jenkins settings
-# These values are used by jcasc/00-main.yaml to configure Jenkins.
 jenkinsCore:
-  # System message displayed on all Jenkins pages.
   systemMessage: "Welcome to Jenkins (Development Environment)"
-
-  # Jenkins location settings.
   location:
-    url: "http://jenkins-dev.example.com" # Replace with your dev Jenkins URL if known, otherwise JCasC uses the current request.
-    adminAddress: "dev-admin@example.com" # Admin email contact.
-
-  # Labels for the Jenkins master node.
+    url: ""
+    adminAddress: "dev-admin@example.com"
   masterLabels: "dev-master local"
-
-  # URL for static Jenkins resources if served from a different location (e.g., CDN).
-  # Usually left blank.
   resourceRootURL: ""
-
-  # Disable deferred wipeout of /tmp and /cache on an agent.
   disableDeferredWipeout: false
-
-  # Global SCM polling configuration.
   scmPolling:
-    pollThreadCount: 5 # Number of SCM polling threads. Lower for dev.
-
-  # Proxy configuration for Jenkins to connect to the internet.
+    pollThreadCount: 5
   proxy:
     enabled: false
-    # host: "proxy.example.com"
-    # port: 8080
-    # username: "" # Optional: if your proxy requires authentication
-    # password: "" # Optional: if your proxy requires authentication (consider using secrets)
-    # noProxy: "kubernetes.default.svc,.cluster.local,127.0.0.1,localhost,*.example.internal"
-
-  # Fingerprint configuration for tracking artifact usage.
   fingerprintConfig:
     enabled: false
-    # storage: "never" # How often to store fingerprints. Valid: 'never', 'daily', 'weekly', 'monthly'.
-    # cleanupPeriod: 24 # How often (in hours) to run fingerprint cleanup.
-
-  # List of administrative monitors to disable.
-  # Provide the simple class name of the monitor.
   administrativeMonitors: []
-  # Example:
-  # administrativeMonitors:
-  #   - "hudson.diagnosis.ReverseProxySetupMonitor"
-  #   - "hudson.model.UpdateCenter$CoreUpdateMonitor"
-
-  # Mailer (email notification) configuration.
   mailer:
     enabled: false
-    # smtpHost: "smtp.example.com"
-    # smtpPort: 25 # Common ports: 25 (SMTP), 465 (SMTPS/SSL), 587 (SMTP/TLS)
-    # useSsl: false
-    # useTls: false # For STARTTLS
-    # smtpUsername: "" # Optional: if your SMTP server requires authentication
-    # smtpPassword: "" # Optional: if your SMTP server requires authentication (consider using secrets)
-    # defaultSuffix: "@example.com" # Appended to user emails if they don't contain '@'
-    # charset: "UTF-8"
+
+# JCasC global environment variables
+jenkinsGlobalEnvVars:
+  logLevel: ""
+  artifactoryUrl: ""
+  dockerRegistry: ""
+  gerritUrlBase: ""
+  gitBaseUrl: ""
+  gitUrl: ""
+  packageCloudProxy: ""
+  pcioCo: ""
+  releaseEmail: ""
+  releaseUsername: ""
+  s3Bucket: ""
+  cdnUrl: ""
+  sigulKey: ""
+  silo: "development"
