@@ -1,0 +1,35 @@
+---
+jenkins:
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: "GLOBAL_LOG_LEVEL"
+        value: '{{ .Values.jenkinsGlobalEnvVars.logLevel | default "ERROR" }}'
+      - key: "ARTIFACTORY_URL"
+        value: '{{ .Values.jenkinsGlobalEnvVars.artifactoryUrl | default "" }}'
+      - key: "COMPANY_NAME"
+        value: "OpenSearch Project"
+      - key: "DOCKER_REGISTRY"
+        value: '{{ .Values.jenkinsGlobalEnvVars.dockerRegistry | default "" }}'
+      - key: "GERRIT_URL"
+        value: '{{ .Values.jenkinsGlobalEnvVars.gerritUrlBase | default "" }}/$PROJECT'
+      - key: "GIT_BASE"
+        value: '{{ .Values.jenkinsGlobalEnvVars.gitBaseUrl | default "" }}/$PROJECT'
+      - key: "GIT_URL"
+        value: '{{ .Values.jenkinsGlobalEnvVars.gitUrl | default "" }}'
+      - key: "PACKAGECLOUDPROXY"
+        value: '{{ .Values.jenkinsGlobalEnvVars.packageCloudProxy | default "" }}'
+      - key: "PCIO_CO"
+        value: '{{ .Values.jenkinsGlobalEnvVars.pcioCo | default "" }}'
+      - key: "RELEASE_EMAIL"
+        value: '{{ .Values.jenkinsGlobalEnvVars.releaseEmail | default "" }}'
+      - key: "RELEASE_USERNAME"
+        value: '{{ .Values.jenkinsGlobalEnvVars.releaseUsername | default "" }}'
+      - key: "S3_BUCKET"
+        value: '{{ .Values.jenkinsGlobalEnvVars.s3Bucket | default "" }}'
+      - key: "CDN_URL"
+        value: '{{ .Values.jenkinsGlobalEnvVars.cdnUrl | default "" }}'
+      - key: "SIGUL_KEY"
+        value: '{{ .Values.jenkinsGlobalEnvVars.sigulKey | default "" }}'
+      - key: "SILO"
+        value: '{{ .Values.jenkinsGlobalEnvVars.silo | default "" }}'
