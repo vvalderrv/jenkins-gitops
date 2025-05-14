@@ -4,7 +4,7 @@
 # Jenkins master image configuration
 jenkinsImage: "myjenkins-custom"
 jenkinsImageTag: "0.2-dev"
-jenkinsImagePullPolicy: "Always"
+jenkinsImagePullPolicy: "IfNotPresent"
 
 # Jenkins master JVM options
 jenkinsJavaOpts: "-Xms512m -Xmx1024m"
