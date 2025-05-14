@@ -3,7 +3,7 @@
 
 # Jenkins master image configuration
 jenkinsImage: "myjenkins-custom"
-jenkinsImageTag: "0.2-dev"
+jenkinsImageTag: "0.3-dev"
 jenkinsImagePullPolicy: "IfNotPresent"
 
 # Jenkins master JVM options
