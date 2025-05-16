@@ -1,25 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
-metadata:
-  name: {{ template "jenkins.fullname" . }}-jcasc-config
-  labels:
-    app.kubernetes.io/name: {{ include "jenkins.name" . }}
-    helm.sh/chart: {{ include "jenkins.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/component: jcasc
+# ... (metadata and labels) ...
 data:
-{{/*
-  Iterate over all .yaml files in the jcasc directory.
-  The path is relative from the chart root (base/jenkins/) to the jcasc directory
-  at the Git repository root (../../jcasc/).
-  For each file:
-  - The key in the ConfigMap data will be the filename (e.g., "00-main.yaml").
-  - The value will be the content of that file, with Helm templating (tpl $) applied.
-  - The content is indented correctly to be valid YAML under the key.
-*/}}
-{{- $files := .Files.Glob "../../jcasc/*.yaml" }} # Corrected path
+{{- $files := .Files.Glob "jcasc/*.yaml" }}
 {{- range $path, $_ := $files }}
   {{ base $path }}: |-
-{{ $.Files.Get $path | tpl $ | indent 4 }}
+{{ ($.Files.Get $path | toString) | indent 4 }}
 {{- end }}

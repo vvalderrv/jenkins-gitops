@@ -6,7 +6,7 @@ jenkins:
       allowsSignup: false
       users:
         - id: "admin"
-          password: "{{ .Values.jenkinsSecurity.adminPassword | default \"{AQAAABAAAAAQplaceholderhash...}\" }}"
+          password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
