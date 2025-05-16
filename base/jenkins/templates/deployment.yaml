@@ -46,6 +46,8 @@ spec:
               value: /var/jenkins_home
             - name: JAVA_OPTS
               value: {{ .Values.jenkinsJavaOpts | quote }}
+            - name: CASC_JENKINS_CONFIG
+              value: /var/jenkins_home/casc_config/
             - name: JCASC_SYSTEM_MESSAGE
               value: {{ .Values.jenkinsCore.systemMessage | quote }}
             - name: JCASC_LOCATION_URL
