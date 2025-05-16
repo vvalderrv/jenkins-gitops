@@ -14,8 +14,7 @@ jenkins:
   mode: EXCLUSIVE
   labelString: "${JCASC_MASTER_LABELS}"
   projectNamingStrategy:
-    strategy: "hudson.model.JobNamingStrategy$DefaultNamingStrategy"
-    forceExistingJobs: false
+    defaultNamingStrategy: {}
   resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
   telemetry:
     usageStatisticsCollected: false
