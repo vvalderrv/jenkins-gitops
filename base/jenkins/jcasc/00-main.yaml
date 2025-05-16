@@ -1,0 +1,40 @@
+---
+jenkins:
+  systemMessage: "${JCASC_SYSTEM_MESSAGE}"
+  numExecutors: 0
+  quietPeriod: 5
+  scmCheckoutRetryCount: 0
+  location:
+    url: "${JCASC_LOCATION_URL}"
+    adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
+  primaryView: "00-empty"
+  mode: EXCLUSIVE
+  labelString: "${JCASC_MASTER_LABELS}"
+  projectNamingStrategy:
+    strategy: "hudson.model.JobNamingStrategy$DefaultNamingStrategy"
+    forceExistingJobs: false
+  resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
+  telemetry:
+    usageStatisticsCollected: false
+  disableDeferredWipeout: "${JCASC_DISABLE_DEFERRED_WIPEOUT}" # Jenkins JCasC handles string "true"/"false"
+  pollSCM:
+    pollThreadCount: ${JCASC_SCM_POLLING_THREADCOUNT} # Jenkins JCasC handles numeric strings
+  pipelineDurability:
+    defaultDurability: NONE
+  proxy:
+    name: "${JCASC_PROXY_HOST}"
+    port: ${JCASC_PROXY_PORT} # Jenkins JCasC handles numeric strings
+    userName: "${JCASC_PROXY_USERNAME}"
+    noProxyHost: "${JCASC_PROXY_NOPROXY}"
+  fingerprintConfig:
+    fingerprintStorage: "${JCASC_FINGERPRINT_STORAGE}"
+    fingerprintCleanupPeriod: ${JCASC_FINGERPRINT_CLEANUP_PERIOD} # Jenkins JCasC handles numeric strings
+  # administrativeMonitors section would need env var strategy if dynamic.
+  mailer:
+    smtpHost: "${JCASC_MAILER_SMTP_HOST}"
+    smtpPort: ${JCASC_MAILER_SMTP_PORT} # Jenkins JCasC handles numeric strings
+    useSsl: "${JCASC_MAILER_USE_SSL}" # Jenkins JCasC handles string "true"/"false"
+    useTls: "${JCASC_MAILER_USE_TLS}" # Jenkins JCasC handles string "true"/"false"
+    smtpAuthUserName: "${JCASC_MAILER_SMTP_USERNAME}"
+    defaultSuffix: "${JCASC_MAILER_DEFAULT_SUFFIX}"
+    charset: "${JCASC_MAILER_CHARSET}"
