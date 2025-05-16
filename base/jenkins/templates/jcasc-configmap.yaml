@@ -1,6 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
-# ... (metadata and labels) ...
+metadata:
+  name: {{ template "jenkins.fullname" . }}-jcasc-config
+  labels:
+    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: jcasc
 data:
 {{- $files := .Files.Glob "jcasc/*.yaml" }}
 {{- range $path, $_ := $files }}
