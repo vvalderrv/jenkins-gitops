@@ -48,86 +48,10 @@ spec:
               value: {{ .Values.jenkinsJavaOpts | quote }}
             - name: CASC_JENKINS_CONFIG
               value: /var/jenkins_home/casc_config/
-            - name: JCASC_SYSTEM_MESSAGE
-              value: {{ .Values.jenkinsCore.systemMessage | quote }}
-            - name: JCASC_LOCATION_URL
-              value: {{ .Values.jenkinsCore.location.url | default "" | quote }}
-            - name: JCASC_LOCATION_ADMINADDRESS
-              value: {{ .Values.jenkinsCore.location.adminAddress | quote }}
-            - name: JCASC_MASTER_LABELS
-              value: {{ .Values.jenkinsCore.masterLabels | quote }}
-            - name: JCASC_RESOURCE_ROOT_URL
-              value: {{ .Values.jenkinsCore.resourceRootURL | default "" | quote }}
-            - name: JCASC_DISABLE_DEFERRED_WIPEOUT
-              value: {{ .Values.jenkinsCore.disableDeferredWipeout | quote }}
-            - name: JCASC_SCM_POLLING_THREADCOUNT
-              value: {{ .Values.jenkinsCore.scmPolling.pollThreadCount | quote }}
-            {{- if .Values.jenkinsCore.proxy.enabled }}
-            - name: JCASC_PROXY_HOST
-              value: {{ .Values.jenkinsCore.proxy.name | default "" | quote }}
-            - name: JCASC_PROXY_PORT
-              value: {{ .Values.jenkinsCore.proxy.port | default "" | quote }}
-            - name: JCASC_PROXY_USERNAME
-              value: {{ .Values.jenkinsCore.proxy.userName | default "" | quote }}
-            - name: JCASC_PROXY_NOPROXY
-              value: {{ .Values.jenkinsCore.proxy.noProxyHost | default "" | quote }}
+            {{- range $key, $value := .Values.jenkinsEnvVars }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
             {{- end }}
-            {{- if .Values.jenkinsCore.fingerprintConfig.enabled }}
-            - name: JCASC_FINGERPRINT_STORAGE
-              value: {{ .Values.jenkinsCore.fingerprintConfig.fingerprintStorage | default "" | quote }}
-            - name: JCASC_FINGERPRINT_CLEANUP_PERIOD
-              value: {{ .Values.jenkinsCore.fingerprintConfig.fingerprintCleanupPeriod | default "" | quote }}
-            {{- end }}
-            {{- if .Values.jenkinsCore.mailer.enabled }}
-            - name: JCASC_MAILER_SMTP_HOST
-              value: {{ .Values.jenkinsCore.mailer.smtpHost | default "" | quote }}
-            - name: JCASC_MAILER_SMTP_PORT
-              value: {{ .Values.jenkinsCore.mailer.smtpPort | default "" | quote }}
-            - name: JCASC_MAILER_USE_SSL
-              value: {{ .Values.jenkinsCore.mailer.useSsl | default "false" | quote }}
-            - name: JCASC_MAILER_USE_TLS
-              value: {{ .Values.jenkinsCore.mailer.useTls | default "false" | quote }}
-            - name: JCASC_MAILER_SMTP_USERNAME
-              value: {{ .Values.jenkinsCore.mailer.smtpAuthUserName | default "" | quote }}
-            - name: JCASC_MAILER_DEFAULT_SUFFIX
-              value: {{ .Values.jenkinsCore.mailer.defaultSuffix | default "" | quote }}
-            - name: JCASC_MAILER_CHARSET
-              value: {{ .Values.jenkinsCore.mailer.charset | default "UTF-8" | quote }}
-            {{- end }}
-            - name: JCASC_JENKINSGLOBALENVVARS_LOGLEVEL
-              value: {{ .Values.jenkinsGlobalEnvVars.logLevel | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL
-              value: {{ .Values.jenkinsGlobalEnvVars.artifactoryUrl | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY
-              value: {{ .Values.jenkinsGlobalEnvVars.dockerRegistry | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE
-              value: {{ .Values.jenkinsGlobalEnvVars.gerritUrlBase | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_GITBASEURL
-              value: {{ .Values.jenkinsGlobalEnvVars.gitBaseUrl | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_GITURL
-              value: {{ .Values.jenkinsGlobalEnvVars.gitUrl | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY
-              value: {{ .Values.jenkinsGlobalEnvVars.packageCloudProxy | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_PCIOCO
-              value: {{ .Values.jenkinsGlobalEnvVars.pcioCo | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL
-              value: {{ .Values.jenkinsGlobalEnvVars.releaseEmail | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME
-              value: {{ .Values.jenkinsGlobalEnvVars.releaseUsername | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_S3BUCKET
-              value: {{ .Values.jenkinsGlobalEnvVars.s3Bucket | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_CDNURL
-              value: {{ .Values.jenkinsGlobalEnvVars.cdnUrl | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_SIGULKEY
-              value: {{ .Values.jenkinsGlobalEnvVars.sigulKey | default "" | quote }}
-            - name: JCASC_JENKINSGLOBALENVVARS_SILO
-              value: {{ .Values.jenkinsGlobalEnvVars.silo | default "" | quote }}
-            - name: JCASC_JENKINSSECURITY_ADMINPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: jenkins-admin-secret
-                  key: adminPassword
-                  optional: true
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home
