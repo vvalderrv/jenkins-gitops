@@ -4,9 +4,6 @@ jenkins:
   numExecutors: 0
   quietPeriod: 5
   scmCheckoutRetryCount: 0
-#  location:
-#    url: "${JCASC_LOCATION_URL}"
-#    adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
   primaryView: "all"
   views:
     - allView:
@@ -38,3 +35,8 @@ jenkins:
 #    smtpAuthUserName: "${JCASC_MAILER_SMTP_USERNAME}"
 #    defaultSuffix: "${JCASC_MAILER_DEFAULT_SUFFIX}"
 #    charset: "${JCASC_MAILER_CHARSET}"
+
+unclassified:
+  locationConfiguration:
+    url: "${JCASC_LOCATION_URL}"
+    adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
