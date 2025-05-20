@@ -6,7 +6,7 @@ metadata:
     {{- include "jenkins.labels" . | nindent 4 }}
     app.kubernetes.io/component: jcasc
 data:
-{{- $files := .Files.Glob "jcasc/*.yaml" }}
+{{- $files := .Files.Glob "jcasc_yamls/*.yaml" }}
 {{- range $path, $_ := $files }}
   {{ base $path }}: |-
 {{ ($.Files.Get $path | toString) | indent 4 }}

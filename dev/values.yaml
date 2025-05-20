@@ -18,7 +18,39 @@ jenkinsJavaOpts: "-Xms512m -Xmx1024m"
 #     cpu: "1"
 #     memory: "2Gi"
 
-# JCasC core Jenkins settings
+# Environment variables to be passed to the Jenkins master pod
+# These will be used by JCasC for ${JCASC_...} substitution
+jenkinsEnvVars:
+  JCASC_JENKINSCORE_SYSTEMMESSAGE: "Welcome to Jenkins (Development Environment)"
+  JCASC_JENKINSCORE_LOCATIONURL: ""
+  JCASC_JENKINSCORE_LOCATIONADMINADDRESS: "dev-admin@example.com"
+  JCASC_JENKINSCORE_MASTERLABELS: "dev-master local"
+  JCASC_JENKINSCORE_RESOURCEROOTURL: ""
+  JCASC_JENKINSCORE_DISABLEDEFERREDWIPEOUT: "false"
+  JCASC_JENKINSCORE_SCMPOLLINGPOLLTHREADCOUNT: "5"
+  JCASC_JENKINSCORE_PROXYENABLED: "false"
+  JCASC_JENKINSCORE_FINGERPRINTCONFIGENABLED: "false"
+  JCASC_JENKINSCORE_MAILERENABLED: "false"
+
+  JCASC_JENKINSSECURITY_ADMINPASSWORD: "yourDevAdminPasswordPlaceholder"
+
+  JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
+  JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
+  JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
+  JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE: ""
+  JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
+  JCASC_JENKINSGLOBALENVVARS_GITURL: ""
+  JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
+  JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
+  JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
+  JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
+  JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
+  JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
+  JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
+  JCASC_JENKINSGLOBALENVVARS_SILO: "development"
+  JCASC_JENKINSGLOBALENVVARS_COMPANYNAME: "OpenSearch Project" # From 01-global-env-vars.yaml (hardcoded value)
+
+# JCasC core Jenkins settings (for reference, JCasC now uses env vars above)
 jenkinsCore:
   systemMessage: "Welcome to Jenkins (Development Environment)"
   location:
@@ -37,7 +69,7 @@ jenkinsCore:
   mailer:
     enabled: false
 
-# JCasC global environment variables
+# JCasC global environment variables (for reference, JCasC now uses env vars above)
 jenkinsGlobalEnvVars:
   logLevel: ""
   artifactoryUrl: ""
