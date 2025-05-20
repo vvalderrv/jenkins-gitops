@@ -37,6 +37,6 @@ jenkins:
 #    charset: "${JCASC_MAILER_CHARSET}"
 
 unclassified:
-  locationConfiguration:
+  location: # Corrected from locationConfiguration
     url: "${JCASC_LOCATION_URL}"
     adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
