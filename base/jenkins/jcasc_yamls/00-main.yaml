@@ -21,13 +21,13 @@ jenkins:
 #    defaultDurability: NONE
   proxy:
     name: "${JCASC_PROXY_HOST}"
-    port: ${JCASC_PROXY_PORT}
+    port: ${JCASC_PROXY_PORT} # JCasC proxy configurator handles empty string for port by setting it to 0
     userName: "${JCASC_PROXY_USERNAME}"
     noProxyHost: "${JCASC_PROXY_NOPROXY}"
 #  fingerprintConfig:
 #    fingerprintStorage: "${JCASC_FINGERPRINT_STORAGE}"
 #    fingerprintCleanupPeriod: ${JCASC_FINGERPRINT_CLEANUP_PERIOD}
-#  mailer:
+#  mailer: # This is the old commented out top-level mailer block, it should be removed if present
 #    smtpHost: "${JCASC_MAILER_SMTP_HOST}"
 #    smtpPort: ${JCASC_MAILER_SMTP_PORT}
 #    useSsl: "${JCASC_MAILER_USE_SSL}"
@@ -37,6 +37,8 @@ jenkins:
 #    charset: "${JCASC_MAILER_CHARSET}"
 
 unclassified:
-  location: # Corrected from locationConfiguration
+  location:
     url: "${JCASC_LOCATION_URL}"
     adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
+  mailer:
+    smtpHost:
