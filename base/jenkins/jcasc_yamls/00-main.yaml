@@ -13,8 +13,8 @@ jenkins:
         name: "all"
   mode: EXCLUSIVE
   labelString: "${JCASC_MASTER_LABELS}"
-  projectNamingStrategy:
-    defaultNamingStrategy: {}
+#  projectNamingStrategy:
+#    defaultNamingStrategy: {}
   resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
   telemetry:
     usageStatisticsCollected: false
