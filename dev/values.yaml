@@ -21,18 +21,29 @@ jenkinsJavaOpts: "-Xms512m -Xmx1024m"
 # Environment variables to be passed to the Jenkins master pod
 # These will be used by JCasC for ${JCASC_...} substitution
 jenkinsEnvVars:
-  JCASC_JENKINSCORE_SYSTEMMESSAGE: "Welcome to Jenkins (Development Environment)"
-  JCASC_JENKINSCORE_LOCATIONURL: ""
-  JCASC_JENKINSCORE_LOCATIONADMINADDRESS: "dev-admin@example.com"
-  JCASC_JENKINSCORE_MASTERLABELS: "dev-master local"
-  JCASC_JENKINSCORE_RESOURCEROOTURL: ""
-  JCASC_JENKINSCORE_DISABLEDEFERREDWIPEOUT: "false"
-  JCASC_JENKINSCORE_SCMPOLLINGPOLLTHREADCOUNT: "5"
-  JCASC_JENKINSCORE_PROXYENABLED: "false"
-  JCASC_JENKINSCORE_FINGERPRINTCONFIGENABLED: "false"
-  JCASC_JENKINSCORE_MAILERENABLED: "false"
+  JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Development Environment)"
+  JCASC_LOCATION_URL: ""
+  JCASC_LOCATION_ADMINADDRESS: "dev-admin@example.com"
+  JCASC_MASTER_LABELS: "dev-master local"
+  JCASC_RESOURCE_ROOT_URL: ""
+  JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
+  JCASC_SCM_POLLING_THREADCOUNT: "5"
 
-  JCASC_JENKINSSECURITY_ADMINPASSWORD: "yourDevAdminPasswordPlaceholder"
+  JCASC_PROXY_HOST: ""
+  JCASC_PROXY_PORT: ""
+  JCASC_PROXY_USERNAME: ""
+  JCASC_PROXY_NOPROXY: ""
+
+  JCASC_FINGERPRINT_STORAGE: ""
+  JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
+
+  JCASC_MAILER_SMTP_HOST: ""
+  JCASC_MAILER_SMTP_PORT: ""
+  JCASC_MAILER_USE_SSL: "false"
+  JCASC_MAILER_USE_TLS: "false"
+  JCASC_MAILER_SMTP_USERNAME: ""
+  JCASC_MAILER_DEFAULT_SUFFIX: ""
+  JCASC_MAILER_CHARSET: "UTF-8"
 
   JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
   JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
@@ -48,9 +59,14 @@ jenkinsEnvVars:
   JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
   JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
   JCASC_JENKINSGLOBALENVVARS_SILO: "development"
-  JCASC_JENKINSGLOBALENVVARS_COMPANYNAME: "OpenSearch Project" # From 01-global-env-vars.yaml (hardcoded value)
 
-# JCasC core Jenkins settings (for reference, JCasC now uses env vars above)
+  JCASC_JENKINSSECURITY_ADMINPASSWORD: "yourDevAdminPasswordPlaceholder"
+
+# The jenkinsCore and jenkinsGlobalEnvVars sections below are for reference.
+# JCasC will use the JCASC_... environment variables defined above.
+# You might choose to remove them later to avoid confusion.
+
+# JCasC core Jenkins settings (reference)
 jenkinsCore:
   systemMessage: "Welcome to Jenkins (Development Environment)"
   location:
@@ -69,7 +85,7 @@ jenkinsCore:
   mailer:
     enabled: false
 
-# JCasC global environment variables (for reference, JCasC now uses env vars above)
+# JCasC global environment variables (reference)
 jenkinsGlobalEnvVars:
   logLevel: ""
   artifactoryUrl: ""
