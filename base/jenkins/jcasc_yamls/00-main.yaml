@@ -37,6 +37,7 @@ unclassified:
     smtpPort: ${JCASC_MAILER_SMTP_PORT:-0}
     useSsl: "${JCASC_MAILER_USE_SSL}"
     useTls: "${JCASC_MAILER_USE_TLS}"
-    smtpAuthUserName: "${JCASC_MAILER_SMTP_USERNAME}"
+    authentication:
+      username: "${JCASC_MAILER_SMTP_USERNAME}"
     defaultSuffix: "${JCASC_MAILER_DEFAULT_SUFFIX}"
     charset: "${JCASC_MAILER_CHARSET}"
