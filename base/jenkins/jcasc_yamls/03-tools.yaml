@@ -1,3 +1,6 @@
-# jcasc/03-tools.yaml
-# Placeholder for Jenkins tool installation configurations
-# (JDK, Maven, Node, etc.).
+# Java Development Kit (JDK)
+tool:
+  jdk:
+    installations:
+      - name: "jdk-17"
+        home: "/opt/java/openjdk"
