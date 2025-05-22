@@ -11,11 +11,11 @@ jenkins:
   mode: EXCLUSIVE
   labelString: "${JCASC_MASTER_LABELS}"
   projectNamingStrategy: "standard"
-  resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
+  # resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
   noUsageStatistics: true
-#  disableDeferredWipeout: "${JCASC_DISABLE_DEFERRED_WIPEOUT}"
-#  pipelineDurability:
-#    defaultDurability: NONE
+  #  disableDeferredWipeout: "${JCASC_DISABLE_DEFERRED_WIPEOUT}"
+  #  pipelineDurability:
+  #    defaultDurability: NONE
   proxy:
     name: "${JCASC_PROXY_HOST}"
     port: ${JCASC_PROXY_PORT}
