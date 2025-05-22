@@ -15,8 +15,6 @@ jenkins:
 #  resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
   noUsageStatistics: true
 #  disableDeferredWipeout: "${JCASC_DISABLE_DEFERRED_WIPEOUT}"
-#  pollSCM:
-#    pollThreadCount: ${JCASC_SCM_POLLING_THREADCOUNT}
 #  pipelineDurability:
 #    defaultDurability: NONE
   proxy:
@@ -41,3 +39,5 @@ unclassified:
       username: "${JCASC_MAILER_SMTP_USERNAME}"
     defaultSuffix: "${JCASC_MAILER_DEFAULT_SUFFIX}"
     charset: "${JCASC_MAILER_CHARSET}"
+  pollSCM:
+    pollingThreadCount: ${JCASC_SCM_POLLING_THREADCOUNT}
