@@ -4,3 +4,19 @@ tool:
     installations:
       - name: "jdk-17"
         home: "/opt/java/openjdk"
+
+  # Apache Maven
+  maven:
+    installations:
+      - name: "mvn38"
+        properties:
+          - installSource:
+              installers:
+                - maven:
+                    id: "3.8.3"
+      - name: "mvn36"
+        properties:
+          - installSource:
+              installers:
+                - maven:
+                    id: "3.6.3"
