@@ -20,3 +20,17 @@ tool:
               installers:
                 - maven:
                     id: "3.6.3"
+  # NodeJS
+  nodejs:
+    installations:
+      - name: "nodejs14"
+        properties:
+          - installSource:
+              installers:
+                - nodeJS:
+                    id: "14.17.1"
+  # Git
+  git:
+    installations:
+      - name: "Default"
+        home: "git"
