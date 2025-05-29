@@ -21,7 +21,7 @@ tool:
                 - maven:
                     id: "3.6.3"
   # NodeJS
-  nodejs:
+  nodeJS:
     installations:
       - name: "nodejs14"
         properties:
