@@ -27,5 +27,5 @@ tool:
         properties:
           - installSource:
               installers:
-                - nodeJS:
+                - nodeJSInstaller:
                     id: "14.17.1"
