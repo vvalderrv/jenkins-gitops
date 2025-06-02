@@ -8,11 +8,11 @@ unclassified:
   gerrit-trigger:
     servers:
       - name: "placeholder-gerrit"
-        hostname: "gerrit.example.com"
-        port: 29418
-        username: "jenkins-gerrit-user"
         noConnectionOnStartup: true
         config:
+          hostname: "gerrit.example.com"
+          port: 29418
+          username: "jenkins-gerrit-user"
           gerritFrontEndUrl: "http://gerrit.example.com"
 
   gitHubConfiguration:
