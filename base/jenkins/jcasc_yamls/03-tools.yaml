@@ -29,3 +29,8 @@ tool:
               installers:
                 - nodeJSInstaller:
                     id: "14.17.1"
+  # Git
+  git:
+    installations:
+      - name: "Default"
+        home: "git"
