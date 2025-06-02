@@ -1,6 +1,9 @@
-# This file contains plugin-specific configurations.
-# The gerritTrigger section below is a placeholder for projects that may use Gerrit.
-# It uses generic values and is configured not to connect on startup.
+# This file is for plugin-specific configurations.
+# It includes placeholders for Gerrit Trigger and GitHub integrations.
+# These placeholders use generic values and settings intended to be safe for a
+# development environment and prevent unintended interactions with live systems.
+# Actual credentials (e.g., 'github-api-token-placeholder') need to be defined
+# securely elsewhere (e.g., in 06-credentials.yaml via environment variables).
 unclassified:
   gerritTrigger:
     servers:
@@ -11,3 +14,25 @@ unclassified:
         noConnectionOnStartup: true
         config:
           gerritFrontEndUrl: "http://gerrit.example.com"
+
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+
+  gitHubPluginConfig:
+    configs:
+      - name: "opensearch-project"
+        credentialsId: "github-api-token-placeholder"
+    hookUrl: "http://jenkins.placeholder.example.com/github-webhook/"
+
+  ghprbTrigger:
+    cron: "H/5 * * * *"
+    githubAuth:
+      - id: "opensearch-project-ghprb-auth"
+        serverAPIUrl: "https://api.github.com"
+        credentialsId: "github-api-token-placeholder"
+        description: "GitHub auth for opensearch-project PR builder"
+    adminlist: ""
+    manageWebhooks: false
+    okToTestPhrase: ".*ok to test.*"
+    retestPhrase: ".*test this please.*"
+    skipBuildPhrase: ".*\\[skip ci\\].*"
