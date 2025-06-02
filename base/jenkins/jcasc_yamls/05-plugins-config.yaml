@@ -1,2 +1,13 @@
-# jcasc/05-plugins-config.yaml
-# Placeholder for configurations of specific Jenkins plugins.
+# This file contains plugin-specific configurations.
+# The gerritTrigger section below is a placeholder for projects that may use Gerrit.
+# It uses generic values and is configured not to connect on startup.
+unclassified:
+  gerritTrigger:
+    servers:
+      - name: "placeholder-gerrit"
+        hostname: "gerrit.example.com"
+        port: 29418
+        username: "jenkins-gerrit-user"
+        noConnectionOnStartup: true
+        config:
+          gerritFrontEndUrl: "http://gerrit.example.com"
