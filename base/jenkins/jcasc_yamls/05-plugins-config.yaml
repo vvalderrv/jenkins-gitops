@@ -10,9 +10,9 @@ unclassified:
       - name: "placeholder-gerrit"
         noConnectionOnStartup: true
         config:
-          hostname: "gerrit.example.com"
-          port: 29418
-          username: "jenkins-gerrit-user"
+          gerritHostName: "gerrit.example.com"
+          gerritSshPort: 29418
+          gerritUserName: "jenkins-gerrit-user"
           gerritFrontEndUrl: "http://gerrit.example.com"
 
   gitHubConfiguration:
