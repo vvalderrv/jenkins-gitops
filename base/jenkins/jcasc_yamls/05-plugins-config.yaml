@@ -11,7 +11,7 @@ unclassified:
         noConnectionOnStartup: true
         config:
           gerritHostName: "gerrit.example.com"
-          gerritSshPort: 29418
+          gerritSshPort: "29418"
           gerritUserName: "jenkins-gerrit-user"
           gerritFrontEndUrl: "http://gerrit.example.com"
 
