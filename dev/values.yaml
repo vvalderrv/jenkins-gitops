@@ -2,9 +2,10 @@
 # Helm values for the Development Jenkins environment.
 
 # Jenkins master image configuration
-jenkinsImage: "myjenkins-custom"
-jenkinsImageTag: "0.6-dev"
-jenkinsImagePullPolicy: "IfNotPresent"
+jenkinsImage:
+  repository: "myjenkins-custom"
+  tag: "0.6-dev"
+  pullPolicy: "IfNotPresent"
 
 # Jenkins master JVM options
 jenkinsJavaOpts: "-Xms512m -Xmx1024m"
