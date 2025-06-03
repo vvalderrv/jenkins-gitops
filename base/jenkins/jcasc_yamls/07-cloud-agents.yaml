@@ -1,6 +1,6 @@
 jenkins:
   clouds:
-    - ec2:
+    - amazonEC2:
         name: "aws-ec2-test"
         region: "us-east-1"
         credentialsId: "placeholder"
