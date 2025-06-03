@@ -1,39 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{template "jenkins.fullname" .}}
+  name: {{ include "jenkins.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{include "jenkins.name" .}}
-    helm.sh/chart: {{include "jenkins.chart" .}}
-    app.kubernetes.io/instance: {{.Release.Name}}
-    app.kubernetes.io/managed-by: {{.Release.Service}}
+    {{- include "jenkins.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{include "jenkins.name" .}}
-      app.kubernetes.io/instance: {{.Release.Name}}
+      {{- include "jenkins.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        app.kubernetes.io/name: {{include "jenkins.name" .}}
-        app.kubernetes.io/instance: {{.Release.Name}}
-      # annotations:
-      #   prometheus.io/scrape: "true"
-      #   prometheus.io/port: "8080"
+        {{- include "jenkins.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{template "jenkins.serviceAccountName" .}}
-      initContainers:
-        - name: volume-permissions
-          image: busybox:latest
-          command: ["sh", "-c", "chown -R 1000:1000 /var/jenkins_home"]
-          volumeMounts:
-            - name: jenkins-home
-              mountPath: /var/jenkins_home
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "jenkins.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{.Chart.Name}}
-          image: "{{.Values.jenkinsImage}}:{{.Values.jenkinsImageTag | default .Chart.AppVersion}}"
-          imagePullPolicy: {{.Values.jenkinsImagePullPolicy}}
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.jenkinsImage.repository }}:{{ .Values.jenkinsImage.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.jenkinsImage.pullPolicy }}
           ports:
             - name: http
               containerPort: 8080
@@ -41,36 +38,60 @@ spec:
             - name: jnlp
               containerPort: 50000
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
           env:
-            - name: JENKINS_HOME
-              value: /var/jenkins_home
-            - name: JAVA_OPTS
-              value: {{ .Values.jenkinsJavaOpts | quote }}
             - name: CASC_JENKINS_CONFIG
-              value: /var/jenkins_home/casc_config/
+              value: "/var/jenkins_home/casc_config/"
             {{- range $key, $value := .Values.jenkinsEnvVars }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
           volumeMounts:
-            - name: jenkins-home
+            - name: jenkins-home-volume
               mountPath: /var/jenkins_home
             - name: jcasc-config-volume
-              mountPath: /var/jenkins_home/casc_config
-              readOnly: true
+              mountPath: /var/jenkins_home/casc_config/
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        - name: jenkins-home
+        - name: jenkins-home-volume
           persistentVolumeClaim:
-            claimName: {{template "jenkins.fullname" .}}-home
+            claimName: {{ include "jenkins.fullname" . }}-home
         - name: jcasc-config-volume
           configMap:
-            name: {{template "jenkins.fullname" .}}-jcasc-config
-            # Optional: Specify items if you only want specific files
-            # items: # This key itself is now commented
-            #   - key: 00-main.yaml
-            #     path: 00-main.yaml
+            name: jenkins-dev-jcasc-config
+            items:
+              - key: 00-main.yaml
+                path: 00-main.yaml
+              - key: 01-global-env-vars.yaml
+                path: 01-global-env-vars.yaml
+              - key: 02-security.yaml
+                path: 02-security.yaml
+              - key: 03-tools.yaml
+                path: 03-tools.yaml
+              - key: 04-global-libraries.yaml
+                path: 04-global-libraries.yaml
+              - key: 05-plugins-config.yaml
+                path: 05-plugins-config.yaml
+              - key: 06-credentials.yaml
+                path: 06-credentials.yaml
+              - key: 07-cloud-agents.yaml
+                path: 07-cloud-agents.yaml
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
