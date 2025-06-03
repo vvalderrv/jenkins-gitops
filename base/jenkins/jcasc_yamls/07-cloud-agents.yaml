@@ -1,51 +1,9 @@
 # This file is for Jenkins cloud agent configurations.
-# For Phase 1 (local dev), EC2 configurations will be placeholders.
-# Actual values for AMI IDs, credentials, subnets, etc.,
-# will be needed for staging and production environments.
 
 jenkins:
   clouds:
-    # This section defines a connection to an AWS EC2 cloud.
-    # - cloudName: A unique name for this cloud configuration in Jenkins.
-    # - region: The AWS region where EC2 instances will be launched.
-    # - credentialsId: The ID of a Jenkins credential (e.g., AWS Credentials
-    #   type) that provides access to your AWS account. This credential would
-    #   typically be defined in 06-credentials.yaml or via another
-    #   secure mechanism.
-    # - privateKey: (Optional/Alternative to credentialsId for some auth
-    #   methods) Raw private key material. Using credentialsId with an IAM role
-    #   is often preferred.
-    # - instanceCapStr: A string representing the maximum number of instances
-    #   this cloud configuration can launch.
-    # - sshPort: Port used for SSH connections to agents.
     - ec2:
-        cloudName: "aws-ec2-dev-placeholder"
+        cloudName: "aws-ec2-test"
         region: "us-east-1"
-        credentialsId: "aws-ec2-credentials-placeholder"
-        privateKey: ""
-        instanceCapStr: "2"
-        sshPort: "22"
-
-        # Templates define the types of EC2 instances Jenkins can launch.
-        # Each template uses attributes like 'ami', 'description', 'type'
-        # 'labelString' (for agent labels), 'remoteFS', 'subnetId',
-        # 'securityGroups','iamInstanceProfile', and 'tags'.
-        # 'keyPairName' was omitted based on JCasC error analysis; ensure your
-        # AMI/agent setup does not strictly require it if primarily using IAM
-        # profiles for auth.
-        templates:
-          - ami: "ami-packer-placeholder-id"
-            description: "Placeholder Packer-based EC2 Linux Agent"
-            type: "t3.medium"
-            labelString: "ec2 linux general-purpose packer-agent"
-            remoteFS: "/home/ec2-user"
-            subnetId: "subnet-placeholderid_for_dev_or_testing"
-            securityGroups: "sg-placeholder_jenkins_agent_access"
-            iamInstanceProfile: "jenkins-agent-ec2-profile-placeholder"
-            tags:
-              - name: "Name"
-                value: "jenkins-agent-ec2-dev-placeholder"
-              - name: "Service"
-                value: "JenkinsAgent"
-              - name: "Environment"
-                value: "DevelopmentPlaceholder"
+        credentialsId: "placeholder"
+        instanceCapStr: "0"
