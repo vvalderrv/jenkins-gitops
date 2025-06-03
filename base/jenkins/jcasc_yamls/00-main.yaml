@@ -6,7 +6,7 @@ jenkins:
   scmCheckoutRetryCount: 0
   primaryView: "all"
   views:
-    - allView:
+    - all:
         name: "all"
   mode: EXCLUSIVE
   labelString: "${JCASC_MASTER_LABELS}"
