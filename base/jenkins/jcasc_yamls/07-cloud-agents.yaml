@@ -1,9 +1,7 @@
-# This file is for Jenkins cloud agent configurations.
-
 jenkins:
   clouds:
     - ec2:
-        cloudName: "aws-ec2-test"
+        name: "aws-ec2-test"
         region: "us-east-1"
         credentialsId: "placeholder"
         instanceCapStr: "0"
