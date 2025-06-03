@@ -7,3 +7,4 @@ jenkins:
         region: "us-east-1"
         credentialsId: "placeholder"
         instanceCapStr: "0"
+        templates: []
