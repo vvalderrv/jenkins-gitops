@@ -27,37 +27,21 @@ jenkins:
         sshPort: "22"
 
         # Templates define the types of EC2 instances Jenkins can launch.
-        # Each template typically corresponds to a specific Packer-built AMI
-        # and instance configuration.
-        # - ami: The ID of the Amazon Machine Image (AMI). This will be your
-        #   Packer-built image.
-        # - description: A human-readable description for this agent template.
-        # - instanceType: The EC2 instance type (e.g., t3.medium, m5.large).
-        # - labels: Jenkins labels assigned to agents from this template,
-        #   used by jobs to select agents.
-        # - remoteFS: The remote file system root on the agent
-        #   (e.g., /home/ec2-user or /home/jenkins).
-        # - subnetId: The VPC subnet ID where instances should be launched.
-        #   Crucial for network placement.
-        # - securityGroups: Comma-separated list of security group names or IDs.
-        # - iamInstanceProfile: (Recommended for secure AWS access without
-        #   embedding credentials) The ARN or name of the IAM instance profile.
-        # - keyPairName: (Optional) Name of an EC2 key pair for direct SSH
-        #   access if needed.
-        # - tags: (Optional) AWS tags to apply to launched instances for
-        #   organization and cost tracking.
-        # Additional template options like 'initScript', 'userData',
-        # 'connectBySSHProcess', 'instanceCapStr' (per-template) can be added.
+        # Each template uses attributes like 'ami', 'description', 'type'
+        # 'labelString' (for agent labels), 'remoteFS', 'subnetId',
+        # 'securityGroups','iamInstanceProfile', and 'tags'.
+        # 'keyPairName' was omitted based on JCasC error analysis; ensure your
+        # AMI/agent setup does not strictly require it if primarily using IAM
+        # profiles for auth.
         templates:
           - ami: "ami-packer-placeholder-id"
             description: "Placeholder Packer-based EC2 Linux Agent"
-            instanceType: "t3.medium"
-            labels: "ec2 linux general-purpose packer-agent"
+            type: "t3.medium"
+            labelString: "ec2 linux general-purpose packer-agent"
             remoteFS: "/home/ec2-user"
             subnetId: "subnet-placeholderid_for_dev_or_testing"
             securityGroups: "sg-placeholder_jenkins_agent_access"
             iamInstanceProfile: "jenkins-agent-ec2-profile-placeholder"
-            keyPairName: ""
             tags:
               - name: "Name"
                 value: "jenkins-agent-ec2-dev-placeholder"
