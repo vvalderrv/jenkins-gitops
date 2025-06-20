@@ -78,10 +78,10 @@ body:
   - type: checkboxes
     id: triage-checklist
     attributes:
-      label: Triage Checklist (for maintainers)
+      label: Maintainer Checklist
       description: Steps for maintainers to verify
       options:
-        - Classification and impact reviewed
-        - Section reference verified
-        - Assigned to appropriate team
-        - Version tag applied
+        - label: Classification and impact reviewed
+        - label: Section reference verified
+        - label: Assigned to appropriate team
+        - label: Version tag applied
