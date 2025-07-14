@@ -1,13 +1,24 @@
-# dev/values.yaml
-# Helm values for the Development Jenkins environment.
+# Name: dev/values.yaml
+# Purpose: Provide Helm values customized for the Development Jenkins env
+# Description: Overrides Jenkins image, JVM opts, and JCasC env variables
+# Fields:
+#   controller.image.repository: Custom Jenkins image repository
+#   controller.image.tag: Tag for the Jenkins image (e.g., "0.6-dev")
+#   controller.image.pullPolicy: Image pull policy for Dev
+#   jenkinsJavaOpts: JVM options for the Jenkins master
+#   jenkinsEnvVars: JCASC_… env vars for JCasC configuration
+# Usage:
+#   1. Update controller.image.* for your Dev image requirements
+#   2. Modify jenkinsJavaOpts to adjust JVM settings
+#   3. Populate jenkinsEnvVars for Dev-specific JCASC variables
+#   4. Open a PR; once merged, Argo CD will deploy the updates
 
-# Jenkins master image configuration
-jenkinsImage:
-  repository: "myjenkins-custom"
-  tag: "0.6-dev"
-  pullPolicy: "IfNotPresent"
+controller:
+  image:
+    repository: "myjenkins-custom"
+    tag: "0.6-dev"
+    pullPolicy: "IfNotPresent"
 
-# Jenkins master JVM options
 jenkinsJavaOpts: "-Xms512m -Xmx1024m"
 
 # Optional: Define resource requests and limits
@@ -19,8 +30,6 @@ jenkinsJavaOpts: "-Xms512m -Xmx1024m"
 #     cpu: "1"
 #     memory: "2Gi"
 
-# Environment variables to be passed to the Jenkins master pod
-# These will be used by JCasC for ${JCASC_...} substitution
 jenkinsEnvVars:
   JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Development Environment)"
   JCASC_LOCATION_URL: ""
@@ -62,43 +71,3 @@ jenkinsEnvVars:
   JCASC_JENKINSGLOBALENVVARS_SILO: "development"
 
   JCASC_JENKINSSECURITY_ADMINPASSWORD: "yourDevAdminPasswordPlaceholder"
-
-# The jenkinsCore and jenkinsGlobalEnvVars sections below are for reference.
-# JCasC will use the JCASC_... environment variables defined above.
-# You might choose to remove them later to avoid confusion.
-
-# JCasC core Jenkins settings (reference)
-jenkinsCore:
-  systemMessage: "Welcome to Jenkins (Development Environment)"
-  location:
-    url: ""
-    adminAddress: "dev-admin@example.com"
-  masterLabels: "dev-master local"
-  resourceRootURL: ""
-  disableDeferredWipeout: false
-  scmPolling:
-    pollThreadCount: 5
-  proxy:
-    enabled: false
-  fingerprintConfig:
-    enabled: false
-  administrativeMonitors: []
-  mailer:
-    enabled: false
-
-# JCasC global environment variables (reference)
-jenkinsGlobalEnvVars:
-  logLevel: ""
-  artifactoryUrl: ""
-  dockerRegistry: ""
-  gerritUrlBase: ""
-  gitBaseUrl: ""
-  gitUrl: ""
-  packageCloudProxy: ""
-  pcioCo: ""
-  releaseEmail: ""
-  releaseUsername: ""
-  s3Bucket: ""
-  cdnUrl: ""
-  sigulKey: ""
-  silo: "development"

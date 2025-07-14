@@ -1,6 +1,32 @@
+# Name: Chart.yaml
+# Purpose: Defines metadata and dependencies for the Jenkins wrapper chart.
+# Description: Pulls in the official Jenkins Helm chart and configures JCasC.
+# Fields:
+#   apiVersion: Helm spec version (v2 for dependencies)
+#   name: Chart name for Helm and Argo CD
+#   description: Human-readable description of this wrapper chart
+#   type: Chart type; 'application' for deploying apps
+#   version: Wrapper chart version; bump on JCasC or dependency updates
+#   appVersion: Upstream Jenkins version (e.g., 'lts' or specific tag)
+#   dependencies: Upstream charts this wrapper pulls in
+#     - name: Name of the upstream chart ('jenkins')
+#       version: Exact upstream chart version to fetch
+#       repository: URL of the Helm repo hosting the chart
+# Usage:
+#   1. Update 'version' and 'appVersion' for new Jenkins releases
+#   2. Change dependency 'version' to desired upstream chart version
+#   3. After PR is merged, Argo CD will sync and deploy the change
+
 apiVersion: v2
 name: jenkins
-description: A Helm chart for deploying Jenkins, with configuration managed by JCasC via ConfigMaps
+description: >-
+  A Helm chart for deploying Jenkins, with configuration managed by
+  JCasC via ConfigMaps.
 type: application
 version: 0.1.0
 appVersion: "lts"
+
+dependencies:
+  - name: jenkins
+    version: 5.8.68
+    repository: https://charts.jenkins.io

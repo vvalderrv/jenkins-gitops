@@ -1,7 +1,42 @@
-jenkinsImage: "jenkins/jenkins:lts-jdk11"
+# Name: values.yaml
+# Purpose: Default Helm values for the Jenkins wrapper chart
+# Description: Sets PVC, service account, Jenkins image, and JCasC mounts
+# Fields:
+#   persistence.enabled: Enable PVC for Jenkins home directory
+#   persistence.size: PVC storage request size (e.g., 8Gi)
+#   serviceAccount.create: Create a dedicated ServiceAccount if true
+#   serviceAccount.name: Name of the ServiceAccount to use/create
+#   controller.image.repository: Jenkins Docker image repository
+#   controller.image.tag: Tag for the Jenkins image (e.g., "lts-jdk11")
+#   controller.image.pullPolicy: Image pull policy (e.g., "IfNotPresent")
+#   controller.containerEnv: Environment variables for JCasC in Jenkins
+#   controller.extraVolumes: Extra Kubernetes volumes (e.g., ConfigMap)
+#   controller.extraVolumeMounts: Mount points for extraVolumes
+# Usage:
+#   1. Update fields as required for your environment
+#   2. Open a pull request with your changes
+#   3. After PR merge, Argo CD will apply updated values
+
 persistence:
   enabled: true
   size: 8Gi
+
 serviceAccount:
   create: true
   name: ""
+
+controller:
+  image:
+    repository: "jenkins/jenkins"
+    tag: "lts-jdk11"
+    pullPolicy: "IfNotPresent"
+  containerEnv:
+    - name: CASC_JENKINS_CONFIG
+      value: "/var/jenkins_home/casc_config/"
+  extraVolumes:
+    - name: jcasc-config
+      configMap:
+        name: "{{ include \"jenkins.fullname\" . }}-jcasc-config"
+  extraVolumeMounts:
+    - name: jcasc-config
+      mountPath: "/var/jenkins_home/casc_config/"
