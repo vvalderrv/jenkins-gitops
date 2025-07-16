@@ -26,9 +26,10 @@ serviceAccount:
   name: ""
 
 controller:
+  # NOTE: Update repository to point to your registry for staging and production
   image:
-    repository: "jenkins/jenkins"
-    tag: "lts-jdk11"
+    repository: "ghcr.io/vvalderrv/jenkins-custom"
+    tag: "0.7-dev"
     pullPolicy: "IfNotPresent"
   containerEnv:
     - name: CASC_JENKINS_CONFIG
