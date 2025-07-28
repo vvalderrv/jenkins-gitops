@@ -15,7 +15,8 @@
 
 controller:
   image:
-    repository: "myjenkins-custom"
+    # TODO: Set to your local dev image or org image
+    repository: ""
     tag: "0.6-dev"
     pullPolicy: "IfNotPresent"
 
@@ -70,4 +71,5 @@ jenkinsEnvVars:
   JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
   JCASC_JENKINSGLOBALENVVARS_SILO: "development"
 
-  JCASC_JENKINSSECURITY_ADMINPASSWORD: "yourDevAdminPasswordPlaceholder"
+  # WARNING: Dev-only. Set this in your local env or via a Secret.
+  JCASC_JENKINSSECURITY_ADMINPASSWORD: ""
