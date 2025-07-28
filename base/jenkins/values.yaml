@@ -26,9 +26,10 @@ serviceAccount:
   name: ""
 
 controller:
-  # NOTE: Update repository to point to your registry for staging and production
+  # Use your project's org registry. Default points to LFIT shared image.
+  # Replace with ghcr.io/your-org/jenkins-custom if needed.
   image:
-    repository: "ghcr.io/vvalderrv/jenkins-custom"
+    repository: "ghcr.io/lfit/jenkins-custom"
     tag: "0.7-dev"
     pullPolicy: "IfNotPresent"
   containerEnv:
