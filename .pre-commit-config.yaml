@@ -1,21 +1,23 @@
+# .pre-commit-config.yaml
+---
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-yaml
-        exclude: ^base/jenkins/templates/.*
-      - id: check-added-large-files
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+  hooks:
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: check-yaml
+    exclude: ^base/jenkins/templates/.*
+  - id: check-added-large-files
 
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.32.0
-    hooks:
-      - id: yamllint
-        exclude: ^base/jenkins/templates/.*
+- repo: https://github.com/adrienverge/yamllint
+  rev: 79a6b2b1392eaf49cdd32ac4f14be1a809bbd8f7  # frozen: v1.37.1
+  hooks:
+  - id: yamllint
+    exclude: ^base/jenkins/templates/.*
 
-  - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.19.1
-    hooks:
-      - id: gitlint
-        stages: [commit-msg]
+- repo: https://github.com/jorisroovers/gitlint
+  rev: acc9d9de6369b76d22cb4167029d2035e8730b98  # frozen: v0.19.1
+  hooks:
+  - id: gitlint
+    stages: [commit-msg]

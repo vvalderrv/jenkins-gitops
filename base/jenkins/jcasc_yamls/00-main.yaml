@@ -1,0 +1,42 @@
+---
+jenkins:
+  systemMessage: "${JCASC_SYSTEM_MESSAGE}"
+  numExecutors: 0
+  quietPeriod: 5
+  scmCheckoutRetryCount: 0
+  primaryView: "all"
+  views:
+    - all:
+        name: "all"
+  mode: EXCLUSIVE
+  labelString: "${JCASC_MASTER_LABELS}"
+  projectNamingStrategy: "standard"
+  # resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
+  noUsageStatistics: true
+  #  disableDeferredWipeout: "${JCASC_DISABLE_DEFERRED_WIPEOUT}"
+  #  pipelineDurability:
+  #    defaultDurability: NONE
+  proxy:
+    name: "${JCASC_PROXY_HOST}"
+    port: ${JCASC_PROXY_PORT}
+    userName: "${JCASC_PROXY_USERNAME}"
+    noProxyHost: "${JCASC_PROXY_NOPROXY}"
+#  fingerprintConfig:
+#    fingerprintStorage: "${JCASC_FINGERPRINT_STORAGE}"
+#    fingerprintCleanupPeriod: ${JCASC_FINGERPRINT_CLEANUP_PERIOD}
+
+unclassified:
+  location:
+    url: "${JCASC_LOCATION_URL}"
+    adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
+  mailer:
+    smtpHost: "${JCASC_MAILER_SMTP_HOST}"
+    smtpPort: ${JCASC_MAILER_SMTP_PORT:-0}
+    useSsl: "${JCASC_MAILER_USE_SSL}"
+    useTls: "${JCASC_MAILER_USE_TLS}"
+    authentication:
+      username: "${JCASC_MAILER_SMTP_USERNAME}"
+    defaultSuffix: "${JCASC_MAILER_DEFAULT_SUFFIX}"
+    charset: "${JCASC_MAILER_CHARSET}"
+  pollSCM:
+    pollingThreadCount: ${JCASC_SCM_POLLING_THREADCOUNT}

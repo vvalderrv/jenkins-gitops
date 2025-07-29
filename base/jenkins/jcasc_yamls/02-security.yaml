@@ -1,0 +1,12 @@
+# jcasc/02-security.yaml
+---
+jenkins:
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false

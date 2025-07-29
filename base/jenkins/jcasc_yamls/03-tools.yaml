@@ -1,0 +1,36 @@
+# Java Development Kit (JDK)
+tool:
+  jdk:
+    installations:
+      - name: "jdk-17"
+        home: "/opt/java/openjdk"
+
+  # Apache Maven
+  maven:
+    installations:
+      - name: "mvn38"
+        properties:
+          - installSource:
+              installers:
+                - maven:
+                    id: "3.8.3"
+      - name: "mvn36"
+        properties:
+          - installSource:
+              installers:
+                - maven:
+                    id: "3.6.3"
+  # NodeJS
+  nodejs:
+    installations:
+      - name: "nodejs14"
+        properties:
+          - installSource:
+              installers:
+                - nodeJSInstaller:
+                    id: "14.17.1"
+  # Git
+  git:
+    installations:
+      - name: "Default"
+        home: "git"

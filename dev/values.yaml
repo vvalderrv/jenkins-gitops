@@ -1,4 +1,75 @@
-jenkinsImage: "myjenkins-custom:0.1-dev"
+# Name: dev/values.yaml
+# Purpose: Provide Helm values customized for the Development Jenkins env
+# Description: Overrides Jenkins image, JVM opts, and JCasC env variables
+# Fields:
+#   controller.image.repository: Custom Jenkins image repository
+#   controller.image.tag: Tag for the Jenkins image (e.g., "0.6-dev")
+#   controller.image.pullPolicy: Image pull policy for Dev
+#   jenkinsJavaOpts: JVM options for the Jenkins master
+#   jenkinsEnvVars: JCASC_… env vars for JCasC configuration
+# Usage:
+#   1. Update controller.image.* for your Dev image requirements
+#   2. Modify jenkinsJavaOpts to adjust JVM settings
+#   3. Populate jenkinsEnvVars for Dev-specific JCASC variables
+#   4. Open a PR; once merged, Argo CD will deploy the updates
 
-serviceAccount:
-  create: true
+controller:
+  image:
+    # TODO: Set to your local dev image or org image
+    repository: ""
+    tag: "0.6-dev"
+    pullPolicy: "IfNotPresent"
+
+jenkinsJavaOpts: "-Xms512m -Xmx1024m"
+
+# Optional: Define resource requests and limits
+# resources:
+#   requests:
+#     cpu: "500m"
+#     memory: "1Gi"
+#   limits:
+#     cpu: "1"
+#     memory: "2Gi"
+
+jenkinsEnvVars:
+  JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Development Environment)"
+  JCASC_LOCATION_URL: ""
+  JCASC_LOCATION_ADMINADDRESS: "dev-admin@example.com"
+  JCASC_MASTER_LABELS: "dev-master local"
+  JCASC_RESOURCE_ROOT_URL: ""
+  JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
+  JCASC_SCM_POLLING_THREADCOUNT: "5"
+
+  JCASC_PROXY_HOST: ""
+  JCASC_PROXY_PORT: ""
+  JCASC_PROXY_USERNAME: ""
+  JCASC_PROXY_NOPROXY: ""
+
+  JCASC_FINGERPRINT_STORAGE: ""
+  JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
+
+  JCASC_MAILER_SMTP_HOST: ""
+  JCASC_MAILER_SMTP_PORT: ""
+  JCASC_MAILER_USE_SSL: "false"
+  JCASC_MAILER_USE_TLS: "false"
+  JCASC_MAILER_SMTP_USERNAME: ""
+  JCASC_MAILER_DEFAULT_SUFFIX: ""
+  JCASC_MAILER_CHARSET: "UTF-8"
+
+  JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
+  JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
+  JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
+  JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE: ""
+  JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
+  JCASC_JENKINSGLOBALENVVARS_GITURL: ""
+  JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
+  JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
+  JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
+  JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
+  JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
+  JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
+  JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
+  JCASC_JENKINSGLOBALENVVARS_SILO: "development"
+
+  # WARNING: Dev-only. Set this in your local env or via a Secret.
+  JCASC_JENKINSSECURITY_ADMINPASSWORD: ""
