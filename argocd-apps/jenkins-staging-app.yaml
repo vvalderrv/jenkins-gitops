@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: jenkins-dev
+  name: jenkins-staging
   namespace: argocd
 spec:
   project: jenkins
@@ -11,10 +11,10 @@ spec:
     path: base/jenkins
     helm:
       valueFiles:
-        - ../../dev/values.yaml
+        - ../../staging/values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: jenkins-dev
+    namespace: jenkins-staging
   syncPolicy:
     automated:
       prune: true
