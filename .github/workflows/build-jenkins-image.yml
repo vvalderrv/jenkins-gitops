@@ -38,5 +38,6 @@ jobs:
           docker rm -f jenkins-test
 
       - name: Push Jenkins image to GHCR
+        if: github.repository == 'lfit/jenkins-gitops'
         run: |
           docker push ghcr.io/lfit/jenkins:main
