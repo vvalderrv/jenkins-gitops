@@ -23,7 +23,7 @@ jenkinsJavaOpts: "-Xms4g -Xmx6g"
 jenkinsEnvVars:
   JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Production Environment)"
   JCASC_LOCATION_URL: ""
-  JCASC_LOCATION_ADMINADDRESS: "prod-admin@example.com"
+  JCASC_LOCATION_ADMINADDRESS: "releng+opensearch-jenkins@linuxfoundation.org"
   JCASC_MASTER_LABELS: "prod-controller"
   JCASC_RESOURCE_ROOT_URL: ""
   JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
