@@ -1,0 +1,42 @@
+# .github/workflows/build-jenkins-image.yml
+name: Build Jenkins Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Jenkins Docker image
+        run: |
+          docker build -t ghcr.io/lfit/jenkins:main ./build
+
+      - name: Test Jenkins image
+        run: |
+          docker run -d --name jenkins-test ghcr.io/lfit/jenkins:main
+          echo "⏳ Waiting for Jenkins to start..."
+          sleep 30
+          docker logs jenkins-test | tee jenkins.log
+          docker logs jenkins-test | grep -q "Jenkins is fully up and running"
+          docker rm -f jenkins-test
+
+      - name: Push Jenkins image to GHCR
+        run: |
+          docker push ghcr.io/lfit/jenkins:main
