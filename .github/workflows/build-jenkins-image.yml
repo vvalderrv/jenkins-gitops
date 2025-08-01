@@ -26,13 +26,17 @@ jobs:
 
       - name: Build Jenkins Docker image
         run: |
-          docker build -t ghcr.io/lfit/jenkins:main ./build
+          # Build the Docker image, tagging it with the commit SHA for traceability.
+          docker build -t ghcr.io/lfit/jenkins:${{ github.sha }} ./build
+          # Also tag with 'main' to refer to the latest image from the main branch.
+          docker tag ghcr.io/lfit/jenkins:${{ github.sha }} ghcr.io/lfit/jenkins:main
 
       - name: Test Jenkins image
         run: |
-          docker run -d --name jenkins-test -p 8080:8080 ghcr.io/lfit/jenkins:main
+          echo "Starting Jenkins container for testing..."
+          docker run -d --name jenkins-test -p 8080:8080 ghcr.io/lfit/jenkins:${{ github.sha }}
 
-          echo "Waiting for Jenkins to start..."
+          echo "Waiting for Jenkins to start and become available on port 8080..."
           timeout=60
           interval=5
           elapsed=0
@@ -42,20 +46,29 @@ jobs:
             elapsed=$((elapsed + interval))
             echo "Waiting... ${elapsed}s"
             if [ $elapsed -ge $timeout ]; then
-              echo "Jenkins did not become available on port 8080 in time"
+              echo "Error: Jenkins did not become available on port 8080 in time."
               docker logs jenkins-test
               docker rm -f jenkins-test
               exit 1
             fi
           done
 
-          echo "Jenkins is up on port 8080"
+          echo "Jenkins is up on port 8080."
           docker logs jenkins-test | tee jenkins.log
-          docker logs jenkins-test | grep -E "Jenkins is fully up and running|Completed initialization"
+          echo "Verifying Jenkins initialization messages in logs..."
+          docker logs jenkins-test | grep -E "Jenkins is fully up and running|Completed initialization" || {
+            echo "Error: Expected Jenkins initialization messages not found. This may indicate a problem with the image."
+            docker rm -f jenkins-test
+            exit 1
+          }
 
+          echo "Cleaning up test container."
           docker rm -f jenkins-test
 
       - name: Push Jenkins image to GHCR
         if: github.repository == 'lfit/jenkins-gitops'
         run: |
+          echo "Pushing Jenkins image with commit SHA tag to GitHub Container Registry..."
+          docker push ghcr.io/lfit/jenkins:${{ github.sha }}
+          echo "Pushing Jenkins image with 'main' tag to GitHub Container Registry..."
           docker push ghcr.io/lfit/jenkins:main
