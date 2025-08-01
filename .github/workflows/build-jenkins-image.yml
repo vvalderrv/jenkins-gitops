@@ -30,11 +30,29 @@ jobs:
 
       - name: Test Jenkins image
         run: |
-          docker run -d --name jenkins-test ghcr.io/lfit/jenkins:main
-          echo "⏳ Waiting for Jenkins to start..."
-          sleep 30
+          docker run -d --name jenkins-test -p 8080:8080 ghcr.io/lfit/jenkins:main
+
+          echo "Waiting for Jenkins to start..."
+          timeout=60
+          interval=5
+          elapsed=0
+
+          until curl -s http://localhost:8080/login > /dev/null; do
+            sleep $interval
+            elapsed=$((elapsed + interval))
+            echo "Waiting... ${elapsed}s"
+            if [ $elapsed -ge $timeout ]; then
+              echo "Jenkins did not become available on port 8080 in time"
+              docker logs jenkins-test
+              docker rm -f jenkins-test
+              exit 1
+            fi
+          done
+
+          echo "Jenkins is up on port 8080"
           docker logs jenkins-test | tee jenkins.log
-          docker logs jenkins-test | grep -q "Jenkins is fully up and running"
+          docker logs jenkins-test | grep -E "Jenkins is fully up and running|Completed initialization"
+
           docker rm -f jenkins-test
 
       - name: Push Jenkins image to GHCR
