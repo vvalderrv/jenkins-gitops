@@ -68,7 +68,5 @@ jobs:
       - name: Push Jenkins image to GHCR
         if: github.repository == 'lfit/jenkins-gitops'
         run: |
-          echo "Pushing Jenkins image with commit SHA tag to GitHub Container Registry..."
-          docker push ghcr.io/lfit/jenkins:${{ github.sha }}
-          echo "Pushing Jenkins image with 'main' tag to GitHub Container Registry..."
-          docker push ghcr.io/lfit/jenkins:main
+          echo "Pushing all Jenkins image tags to GitHub Container Registry..."
+          docker push --all-tags ghcr.io/lfit/jenkins
