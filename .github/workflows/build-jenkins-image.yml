@@ -1,0 +1,67 @@
+# .github/workflows/build-jenkins-image.yml
+name: Build Jenkins Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Jenkins Docker image
+        run: |
+          # Build the Docker image, tagging it with the commit SHA for traceability.
+          docker build -t ghcr.io/lfit/jenkins:${{ github.sha }} ./build
+          # Also tag with 'main' to refer to the latest image from the main branch.
+          docker tag ghcr.io/lfit/jenkins:${{ github.sha }} ghcr.io/lfit/jenkins:main
+
+      - name: Test Jenkins image
+        run: |
+          echo "Starting Jenkins container for testing..."
+          docker run -d --name jenkins-test -p 8080:8080 ghcr.io/lfit/jenkins:${{ github.sha }}
+
+          echo "Waiting for Jenkins to start and become available on port 8080..."
+          timeout=60
+          interval=5
+          elapsed=0
+
+          until curl -s http://localhost:8080/login > /dev/null; do
+            sleep $interval
+            elapsed=$((elapsed + interval))
+            echo "Waiting... ${elapsed}s"
+            if [ $elapsed -ge $timeout ]; then
+              echo "Error: Jenkins did not become available on port 8080 in time."
+              docker logs jenkins-test
+              docker rm -f jenkins-test
+              exit 1
+            fi
+          done
+
+          echo "Jenkins is up on port 8080."
+
+          echo "Cleaning up test container."
+          docker rm -f jenkins-test
+
+      - name: Push Jenkins image to GHCR
+        if: github.repository == 'lfit/jenkins-gitops'
+        run: |
+          echo "Pushing Jenkins image with commit SHA tag..."
+          docker push ghcr.io/lfit/jenkins:${{ github.sha }}
+          echo "Pushing Jenkins image with 'main' tag..."
+          docker push ghcr.io/lfit/jenkins:main
