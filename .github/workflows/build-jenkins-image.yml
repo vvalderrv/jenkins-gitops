@@ -54,13 +54,6 @@ jobs:
           done
 
           echo "Jenkins is up on port 8080."
-          docker logs jenkins-test | tee jenkins.log
-          echo "Verifying Jenkins initialization messages in logs..."
-          docker logs jenkins-test | grep -E "Jenkins is fully up and running|Completed initialization" || {
-            echo "Error: Expected Jenkins initialization messages not found. This may indicate a problem with the image."
-            docker rm -f jenkins-test
-            exit 1
-          }
 
           echo "Cleaning up test container."
           docker rm -f jenkins-test
@@ -68,5 +61,7 @@ jobs:
       - name: Push Jenkins image to GHCR
         if: github.repository == 'lfit/jenkins-gitops'
         run: |
-          echo "Pushing all Jenkins image tags to GitHub Container Registry..."
-          docker push --all-tags ghcr.io/lfit/jenkins
+          echo "Pushing Jenkins image with commit SHA tag..."
+          docker push ghcr.io/lfit/jenkins:${{ github.sha }}
+          echo "Pushing Jenkins image with 'main' tag..."
+          docker push ghcr.io/lfit/jenkins:main

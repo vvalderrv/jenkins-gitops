@@ -12,6 +12,7 @@ rendered.*
 # Editor and system files
 .DS_Store
 *.swp
+.vscode/
 
 # Python bytecode
 __pycache__/
