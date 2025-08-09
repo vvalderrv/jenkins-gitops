@@ -1,0 +1,33 @@
+# .github/workflows/deploy-staging.yaml
+name: Deploy Jenkins Staging Environment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'argocd-apps/jenkins-staging-app.yaml'
+  workflow_dispatch:
+
+jobs:
+  apply-argocd-manifest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.27.7'
+
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_STAGING }}" > ~/.kube/config
+
+      - name: Apply ArgoCD Application Manifest
+        run: |
+          kubectl apply -f argocd-apps/jenkins-staging-app.yaml
