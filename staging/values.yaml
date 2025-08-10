@@ -8,10 +8,6 @@ controller:
     repository: "jenkins/jenkins"
     tag: "lts-jdk17"
     pullPolicy: "IfNotPresent"
-  persistence:
-    enabled: true
-    storageClass: "gp2"
-    size: "20Gi"
 
 # Defining resource requests and limits for the staging environment.
 resources:
@@ -63,3 +59,8 @@ jenkinsEnvVars:
   JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
   JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
   JCASC_JENKINSGLOBALENVVARS_SILO: "staging"
+
+persistence:
+  enabled: true
+  storageClass: "gp2"
+  size: "20Gi"
