@@ -1,0 +1,65 @@
+name: Validate Jenkins Plugins
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'build/plugins.txt'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'build/plugins.txt'
+
+jobs:
+  validate-plugins:
+    name: Validate Plugin Installation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate plugins.txt syntax
+        run: |
+          echo "Checking plugins.txt syntax..."
+          # Check for empty lines and malformed entries
+          if grep -q "^[[:space:]]*$" build/plugins.txt; then
+            echo "Error: Found empty lines in plugins.txt"
+            exit 1
+          fi
+
+          # Check for proper plugin format (plugin-name:version or plugin-name)
+          if grep -qv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" build/plugins.txt; then
+            echo "Error: Invalid plugin format found"
+            grep -nv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" build/plugins.txt
+            exit 1
+          fi
+
+          echo "plugins.txt syntax is valid"
+
+      - name: Test plugin installation
+        run: |
+          echo "Testing plugin installation with Jenkins..."
+
+          # Create minimal test Dockerfile
+          cat > Dockerfile.test << 'EOF'
+          FROM jenkins/jenkins:2.492.3-lts-jdk21
+          USER root
+          COPY build/plugins.txt /tmp/plugins.txt
+          USER jenkins
+          RUN jenkins-plugin-cli --verbose --plugin-file /tmp/plugins.txt
+          EOF
+
+          # Build test image
+          docker build -f Dockerfile.test -t jenkins-plugin-test .
+
+          echo "All plugins installed successfully"
+
+      - name: Check for plugin conflicts
+        run: |
+          echo "Checking for known plugin conflicts..."
+
+          # Create test container to check installed plugins
+          docker run --rm jenkins-plugin-test jenkins-plugin-cli --list >
