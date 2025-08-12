@@ -15,6 +15,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      JENKINS_IMAGE_REPOSITORY: "ghcr.io/vvalderrv/jenkins"
 
     steps:
       - name: Checkout repository
@@ -35,7 +37,7 @@ jobs:
         run: |
           echo "Updating staging/values.yaml with new image tag..."
 
-          sed -i 's|repository: "jenkins/jenkins"|repository: "ghcr.io/vvalderrv/jenkins"|g' staging/values.yaml
+          sed -i "s|repository: \"jenkins/jenkins\"|repository: \"${JENKINS_IMAGE_REPOSITORY}\"|g" staging/values.yaml
           sed -i 's|tag: "lts-jdk17"|tag: "${{ steps.get-tag.outputs.image-tag }}"|g' staging/values.yaml
 
           if git diff --quiet staging/values.yaml; then
@@ -57,7 +59,7 @@ jobs:
 
             - Updates staging/values.yaml with new image tag
             - Triggered by successful image build: ${{ github.sha }}
-            - Image: ghcr.io/vvalderrv/jenkins:${{ steps.get-tag.outputs.image-tag }}
+            - Image: ${JENKINS_IMAGE_REPOSITORY}:${{ steps.get-tag.outputs.image-tag }}
           title: "Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
           body: |
             ## Staging Image Update
@@ -66,7 +68,7 @@ jobs:
 
             **Changes:**
             - New Image Tag: ${{ steps.get-tag.outputs.image-tag }}
-            - Repository: ghcr.io/vvalderrv/jenkins
+            - Repository: ${JENKINS_IMAGE_REPOSITORY}
             - Build Status: All tests passed
             - Triggered by: ${{ github.event.workflow_run.html_url }}
 
