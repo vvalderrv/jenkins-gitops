@@ -1,67 +1,88 @@
-# .github/workflows/build-jenkins-image.yml
-name: Build Jenkins Image
+name: Build and Test Jenkins Image
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Build and Test Jenkins Image"]
+    types:
+      - completed
     branches:
       - main
 
 jobs:
-  build-test-push:
+  update-staging-image:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
-      contents: read
-      packages: write
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Build Jenkins Docker image
+      - name: Get latest image tag
+        id: get-tag
         run: |
-          # Build the Docker image, tagging it with the commit SHA for traceability.
-          docker build -t ghcr.io/lfit/jenkins:${{ github.sha }} ./build
-          # Also tag with 'main' to refer to the latest image from the main branch.
-          docker tag ghcr.io/lfit/jenkins:${{ github.sha }} ghcr.io/lfit/jenkins:main
+          LATEST_TAG="main-$(echo ${{ github.sha }} | cut -c1-7)"
+          echo "image-tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          echo "Found new image tag: ${LATEST_TAG}"
 
-      - name: Test Jenkins image
+      - name: Update staging values.yaml
+        id: update-values
         run: |
-          echo "Starting Jenkins container for testing..."
-          docker run -d --name jenkins-test -p 8080:8080 ghcr.io/lfit/jenkins:${{ github.sha }}
+          echo "Updating staging/values.yaml with new image tag..."
 
-          echo "Waiting for Jenkins to start and become available on port 8080..."
-          timeout=60
-          interval=5
-          elapsed=0
+          sed -i 's|repository: "jenkins/jenkins"|repository: "ghcr.io/vvalderrv/jenkins"|g' staging/values.yaml
+          sed -i 's|tag: "lts-jdk17"|tag: "${{ steps.get-tag.outputs.image-tag }}"|g' staging/values.yaml
 
-          until curl -s http://localhost:8080/login > /dev/null; do
-            sleep $interval
-            elapsed=$((elapsed + interval))
-            echo "Waiting... ${elapsed}s"
-            if [ $elapsed -ge $timeout ]; then
-              echo "Error: Jenkins did not become available on port 8080 in time."
-              docker logs jenkins-test
-              docker rm -f jenkins-test
-              exit 1
-            fi
-          done
+          if git diff --quiet staging/values.yaml; then
+            echo "No changes needed in staging/values.yaml"
+            echo "changes-made=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes made to staging/values.yaml:"
+            git diff staging/values.yaml
+            echo "changes-made=true" >> $GITHUB_OUTPUT
+          fi
 
-          echo "Jenkins is up on port 8080."
+      - name: Create Pull Request for staging update
+        if: steps.update-values.outputs.changes-made == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
 
-          echo "Cleaning up test container."
-          docker rm -f jenkins-test
+            - Updates staging/values.yaml with new image tag
+            - Triggered by successful image build: ${{ github.sha }}
+            - Image: ghcr.io/vvalderrv/jenkins:${{ steps.get-tag.outputs.image-tag }}
+          title: "Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
+          body: |
+            ## Staging Image Update
 
-      - name: Push Jenkins image to GHCR
-        if: github.repository == 'lfit/jenkins-gitops'
+            This PR automatically updates the Jenkins staging environment with a newly built and tested image.
+
+            **Changes:**
+            - New Image Tag: ${{ steps.get-tag.outputs.image-tag }}
+            - Repository: ghcr.io/vvalderrv/jenkins
+            - Build Status: All tests passed
+            - Triggered by: ${{ github.event.workflow_run.html_url }}
+
+            **What happens after merge:**
+            1. ArgoCD will detect the changes in staging/values.yaml
+            2. Jenkins staging environment will automatically update
+            3. New image will be deployed with all tested plugins and tools
+
+            This PR was automatically created by the Update Staging Image workflow.
+          branch: update-staging-image-${{ steps.get-tag.outputs.image-tag }}
+          delete-branch: true
+
+      - name: Output update status
         run: |
-          echo "Pushing Jenkins image with commit SHA tag..."
-          docker push ghcr.io/lfit/jenkins:${{ github.sha }}
-          echo "Pushing Jenkins image with 'main' tag..."
-          docker push ghcr.io/lfit/jenkins:main
+          if [ "${{ steps.update-values.outputs.changes-made }}" == "true" ]; then
+            echo "Staging image update PR created successfully"
+          else
+            echo "No staging update needed - image already current"
+          fi

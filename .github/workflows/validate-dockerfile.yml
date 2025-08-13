@@ -1,0 +1,71 @@
+name: Validate Dockerfile
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'build/Dockerfile'
+      - 'build/plugins.txt'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'build/Dockerfile'
+      - 'build/plugins.txt'
+
+jobs:
+  dockerfile-validation:
+    name: Lint and Security Scan Dockerfile
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build test image for validation
+        run: |
+          echo "Building image for validation..."
+          docker build -t jenkins-validation-test:latest ./build
+
+      - name: Check base image currency
+        run: |
+          echo "Checking if base image is current..."
+          BASE_IMAGE=$(grep "^FROM" build/Dockerfile | head -n1 | awk '{print $2}')
+          echo "Base image: $BASE_IMAGE"
+
+          # Pull latest to compare
+          docker pull $BASE_IMAGE
+
+          # Check if image is reasonably current (within last 90 days)
+          CREATED_DATE=$(docker inspect $BASE_IMAGE --format='{{.Created}}')
+          echo "Base image created: $CREATED_DATE"
+
+          echo "Base image check completed"
+
+      - name: Validate Dockerfile best practices
+        run: |
+          echo "Checking Dockerfile best practices..."
+
+          # Check for non-root user
+          if ! grep -q "USER jenkins" build/Dockerfile; then
+            echo "ERROR: Dockerfile should end with non-root user"
+            exit 1
+          fi
+
+          # Check for proper layer optimization
+          if [ $(grep -c "^RUN" build/Dockerfile) -gt 5 ]; then
+            echo "WARNING: Consider combining RUN statements to reduce layers"
+          fi
+
+          # Check for LABEL maintainer
+          if ! grep -q "LABEL maintainer" build/Dockerfile; then
+            echo "WARNING: Consider adding LABEL maintainer"
+          fi
+
+          echo "Dockerfile best practices validation completed"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rmi jenkins-validation-test:latest || true

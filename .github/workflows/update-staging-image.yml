@@ -1,0 +1,74 @@
+name: Update Staging Image
+
+on:
+  workflow_run:
+    workflows: ["Build and Test Jenkins Image"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  update-staging:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Get image tag from triggering workflow
+        id: get-tag
+        run: |
+          # Get the SHA that triggered the workflow
+          TRIGGER_SHA="${{ github.event.workflow_run.head_sha }}"
+          echo "Triggered by SHA: $TRIGGER_SHA"
+
+          # Create image tag from branch and short SHA
+          BRANCH_NAME="${{ github.event.workflow_run.head_branch }}"
+          SHORT_SHA=$(echo "$TRIGGER_SHA" | cut -c1-7)
+          IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+
+          echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "Generated image tag: $IMAGE_TAG"
+
+      - name: Update staging values
+        run: |
+          echo "Updating staging/values.yaml with new image tag: ${{ steps.get-tag.outputs.image-tag }}"
+
+          # Update the repository and tag in staging values
+          sed -i 's|repository: "jenkins/jenkins"|repository: "ghcr.io/vvalderrv/jenkins"|g' staging/values.yaml
+          sed -i 's|tag: "lts-jdk17"|tag: "${{ steps.get-tag.outputs.image-tag }}"|g' staging/values.yaml
+
+          echo "Updated staging/values.yaml:"
+          cat staging/values.yaml
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
+
+            Triggered by successful image build: ${{ github.event.workflow_run.head_sha }}
+          file_pattern: staging/values.yaml
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
+          title: "Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
+          body: |
+            ## Automated staging image update
+
+            Updates staging Jenkins image to newly built version.
+
+            **Triggered by:** ${{ github.event.workflow_run.html_url }}
+            **Image tag:** ${{ steps.get-tag.outputs.image-tag }}
+            **Build SHA:** ${{ github.event.workflow_run.head_sha }}
+          branch: update-staging-${{ steps.get-tag.outputs.image-tag }}
+          delete-branch: true
