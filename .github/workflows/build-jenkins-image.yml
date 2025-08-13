@@ -1,4 +1,4 @@
-name: Update Staging Image
+name: Build and Test Jenkins Image
 
 on:
   workflow_run:
@@ -53,12 +53,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: |
-            Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
+            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
 
             - Updates staging/values.yaml with new image tag
             - Triggered by successful image build: ${{ github.sha }}
             - Image: ghcr.io/vvalderrv/jenkins:${{ steps.get-tag.outputs.image-tag }}
-          title: "Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
+          title: "Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
           body: |
             ## Staging Image Update
 

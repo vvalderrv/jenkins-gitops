@@ -9,14 +9,9 @@ on:
       - main
 
 jobs:
-  update-staging-image:
+  update-staging:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    permissions:
-      contents: write
-      pull-requests: write
-    env:
-      JENKINS_IMAGE_REPOSITORY: "ghcr.io/vvalderrv/jenkins"
 
     steps:
       - name: Checkout repository
@@ -25,66 +20,55 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Get latest image tag
+      - name: Get image tag from triggering workflow
         id: get-tag
         run: |
-          LATEST_TAG="main-$(echo ${{ github.sha }} | cut -c1-7)"
-          echo "image-tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
-          echo "Found new image tag: ${LATEST_TAG}"
+          # Get the SHA that triggered the workflow
+          TRIGGER_SHA="${{ github.event.workflow_run.head_sha }}"
+          echo "Triggered by SHA: $TRIGGER_SHA"
 
-      - name: Update staging values.yaml
-        id: update-values
+          # Create image tag from branch and short SHA
+          BRANCH_NAME="${{ github.event.workflow_run.head_branch }}"
+          SHORT_SHA=$(echo "$TRIGGER_SHA" | cut -c1-7)
+          IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+
+          echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "Generated image tag: $IMAGE_TAG"
+
+      - name: Update staging values
         run: |
-          echo "Updating staging/values.yaml with new image tag..."
+          echo "Updating staging/values.yaml with new image tag: ${{ steps.get-tag.outputs.image-tag }}"
 
-          sed -i "s|repository: \"jenkins/jenkins\"|repository: \"${JENKINS_IMAGE_REPOSITORY}\"|g" staging/values.yaml
+          # Update the repository and tag in staging values
+          sed -i 's|repository: "jenkins/jenkins"|repository: "ghcr.io/vvalderrv/jenkins"|g' staging/values.yaml
           sed -i 's|tag: "lts-jdk17"|tag: "${{ steps.get-tag.outputs.image-tag }}"|g' staging/values.yaml
 
-          if git diff --quiet staging/values.yaml; then
-            echo "No changes needed in staging/values.yaml"
-            echo "changes-made=false" >> $GITHUB_OUTPUT
-          else
-            echo "Changes made to staging/values.yaml:"
-            git diff staging/values.yaml
-            echo "changes-made=true" >> $GITHUB_OUTPUT
-          fi
+          echo "Updated staging/values.yaml:"
+          cat staging/values.yaml
 
-      - name: Create Pull Request for staging update
-        if: steps.update-values.outputs.changes-made == 'true'
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
+
+            Triggered by successful image build: ${{ github.event.workflow_run.head_sha }}
+          file_pattern: staging/values.yaml
+
+      - name: Create pull request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: |
-            Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
-
-            - Updates staging/values.yaml with new image tag
-            - Triggered by successful image build: ${{ github.sha }}
-            - Image: ${JENKINS_IMAGE_REPOSITORY}:${{ steps.get-tag.outputs.image-tag }}
-          title: "Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
+            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
+          title: "Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
           body: |
-            ## Staging Image Update
+            ## Automated staging image update
 
-            This PR automatically updates the Jenkins staging environment with a newly built and tested image.
+            Updates staging Jenkins image to newly built version.
 
-            **Changes:**
-            - New Image Tag: ${{ steps.get-tag.outputs.image-tag }}
-            - Repository: ${JENKINS_IMAGE_REPOSITORY}
-            - Build Status: All tests passed
-            - Triggered by: ${{ github.event.workflow_run.html_url }}
-
-            **What happens after merge:**
-            1. ArgoCD will detect the changes in staging/values.yaml
-            2. Jenkins staging environment will automatically update
-            3. New image will be deployed with all tested plugins and tools
-
-            This PR was automatically created by the Update Staging Image workflow.
-          branch: update-staging-image-${{ steps.get-tag.outputs.image-tag }}
+            **Triggered by:** ${{ github.event.workflow_run.html_url }}
+            **Image tag:** ${{ steps.get-tag.outputs.image-tag }}
+            **Build SHA:** ${{ github.event.workflow_run.head_sha }}
+          branch: update-staging-${{ steps.get-tag.outputs.image-tag }}
           delete-branch: true
-
-      - name: Output update status
-        run: |
-          if [ "${{ steps.update-values.outputs.changes-made }}" == "true" ]; then
-            echo "Staging image update PR created successfully"
-          else
-            echo "No staging update needed - image already current"
-          fi

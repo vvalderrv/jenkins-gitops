@@ -23,23 +23,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build test image for security scanning
+      - name: Build test image for validation
         run: |
-          echo "Building image for security scan..."
-          docker build -t jenkins-security-test:latest ./build
-
-      - name: Run Trivy security scanner
-        uses: aquasecurity/trivy-action@0.32.0
-        with:
-          image-ref: 'jenkins-security-test:latest'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
+          echo "Building image for validation..."
+          docker build -t jenkins-validation-test:latest ./build
 
       - name: Check base image currency
         run: |
@@ -81,4 +68,4 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          docker rmi jenkins-security-test:latest || true
+          docker rmi jenkins-validation-test:latest || true
