@@ -1,4 +1,3 @@
-# Jenkins Docker image optimized for OpenSearch CI/CD
 FROM jenkins/jenkins:2.492.3-lts-jdk21
 
 # Set maintainer and disable setup wizard
