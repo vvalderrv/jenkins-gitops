@@ -1,8 +1,8 @@
-name: Update Staging Image
+name: Deploy Staging Environment
 
 on:
   workflow_run:
-    workflows: ["Build and Test Jenkins Image"]
+    workflows: ["Build and Push Jenkins Image"]
     types:
       - completed
     branches:
@@ -12,6 +12,9 @@ jobs:
   update-staging:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -20,48 +23,44 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Get image tag from triggering workflow
+      - name: Get image tag from build workflow
         id: get-tag
         run: |
-          # Get the SHA that triggered the workflow
+          # Get the SHA that triggered the build workflow
           TRIGGER_SHA="${{ github.event.workflow_run.head_sha }}"
-          echo "Triggered by SHA: $TRIGGER_SHA"
-
-          # Create image tag from branch and short SHA
-          BRANCH_NAME="${{ github.event.workflow_run.head_branch }}"
           SHORT_SHA=$(echo "$TRIGGER_SHA" | cut -c1-7)
-          IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+          IMAGE_TAG="main-${SHORT_SHA}"
 
           echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "Generated image tag: $IMAGE_TAG"
+          echo "Generated staging image tag: $IMAGE_TAG"
 
       - name: Update staging values
         run: |
           echo "Updating staging/values.yaml with new image tag: ${{ steps.get-tag.outputs.image-tag }}"
 
+          # Determine registry based on repository
+          if [[ "${{ github.repository }}" == "lfit/jenkins-gitops" ]]; then
+            REGISTRY="ghcr.io/lfit/jenkins"
+          else
+            REGISTRY="ghcr.io/${{ github.repository_owner }}/jenkins"
+          fi
+
           # Update the repository and tag in staging values
-          sed -i 's|repository: "jenkins/jenkins"|repository: "ghcr.io/vvalderrv/jenkins"|g' staging/values.yaml
-          sed -i 's|tag: "lts-jdk17"|tag: "${{ steps.get-tag.outputs.image-tag }}"|g' staging/values.yaml
+          sed -i "s|repository: \".*\"|repository: \"$REGISTRY\"|g" staging/values.yaml
+          sed -i "s|tag: \".*\"|tag: \"${{ steps.get-tag.outputs.image-tag }}\"|g" staging/values.yaml
 
           echo "Updated staging/values.yaml:"
           cat staging/values.yaml
-
-      - name: Commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: |
-            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
-
-            Triggered by successful image build: ${{ github.event.workflow_run.head_sha }}
-          file_pattern: staging/values.yaml
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: |
-            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
-          title: "Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
+            chore: update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
+
+            Triggered by successful image build: ${{ github.event.workflow_run.head_sha }}
+          title: "chore: update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
           body: |
             ## Automated staging image update
 

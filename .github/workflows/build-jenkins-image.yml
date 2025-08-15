@@ -1,88 +1,64 @@
-name: Build and Test Jenkins Image
+# Build and push Jenkins Docker image to GitHub Container Registry
+name: Build and Push Jenkins Image
 
 on:
   workflow_run:
-    workflows: ["Build and Test Jenkins Image"]
+    workflows: ["Validate Dockerfile"]
     types:
       - completed
     branches:
       - main
 
 jobs:
-  update-staging-image:
+  build-and-push:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get latest image tag
-        id: get-tag
+      - name: Determine registry and environment
+        id: registry
         run: |
-          LATEST_TAG="main-$(echo ${{ github.sha }} | cut -c1-7)"
-          echo "image-tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
-          echo "Found new image tag: ${LATEST_TAG}"
-
-      - name: Update staging values.yaml
-        id: update-values
-        run: |
-          echo "Updating staging/values.yaml with new image tag..."
-
-          sed -i 's|repository: "jenkins/jenkins"|repository: "ghcr.io/vvalderrv/jenkins"|g' staging/values.yaml
-          sed -i 's|tag: "lts-jdk17"|tag: "${{ steps.get-tag.outputs.image-tag }}"|g' staging/values.yaml
-
-          if git diff --quiet staging/values.yaml; then
-            echo "No changes needed in staging/values.yaml"
-            echo "changes-made=false" >> $GITHUB_OUTPUT
+          if [[ "${{ github.repository }}" == "lfit/jenkins-gitops" ]]; then
+            # Upstream repository - production registry
+            REGISTRY="ghcr.io/lfit/jenkins"
+            ENVIRONMENT="production"
           else
-            echo "Changes made to staging/values.yaml:"
-            git diff staging/values.yaml
-            echo "changes-made=true" >> $GITHUB_OUTPUT
+            # Fork repository - development registry
+            REGISTRY="ghcr.io/${{ github.repository_owner }}/jenkins"
+            ENVIRONMENT="development"
           fi
 
-      - name: Create Pull Request for staging update
-        if: steps.update-values.outputs.changes-made == 'true'
-        uses: peter-evans/create-pull-request@v5
+          TAG="main-$(echo ${{ github.sha }} | cut -c1-7)"
+          echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "image-tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Using registry: $REGISTRY for $ENVIRONMENT environment"
+
+      - name: Build and push Jenkins image
+        uses: docker/build-push-action@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: |
-            Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}
-
-            - Updates staging/values.yaml with new image tag
-            - Triggered by successful image build: ${{ github.sha }}
-            - Image: ghcr.io/vvalderrv/jenkins:${{ steps.get-tag.outputs.image-tag }}
-          title: "Chore: Update staging Jenkins image to ${{ steps.get-tag.outputs.image-tag }}"
-          body: |
-            ## Staging Image Update
-
-            This PR automatically updates the Jenkins staging environment with a newly built and tested image.
-
-            **Changes:**
-            - New Image Tag: ${{ steps.get-tag.outputs.image-tag }}
-            - Repository: ghcr.io/vvalderrv/jenkins
-            - Build Status: All tests passed
-            - Triggered by: ${{ github.event.workflow_run.html_url }}
-
-            **What happens after merge:**
-            1. ArgoCD will detect the changes in staging/values.yaml
-            2. Jenkins staging environment will automatically update
-            3. New image will be deployed with all tested plugins and tools
-
-            This PR was automatically created by the Update Staging Image workflow.
-          branch: update-staging-image-${{ steps.get-tag.outputs.image-tag }}
-          delete-branch: true
-
-      - name: Output update status
-        run: |
-          if [ "${{ steps.update-values.outputs.changes-made }}" == "true" ]; then
-            echo "Staging image update PR created successfully"
-          else
-            echo "No staging update needed - image already current"
-          fi
+          context: ./build
+          push: true
+          tags: |
+            ${{ steps.registry.outputs.registry }}:${{ steps.registry.outputs.image-tag }}
+            ${{ steps.registry.outputs.registry }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            environment=${{ steps.registry.outputs.environment }}
