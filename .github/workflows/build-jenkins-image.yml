@@ -39,9 +39,7 @@ jobs:
 
           # Generate image tag
           TAG="main-$(echo ${{ github.sha }} | cut -c1-7)"
-
-          # Validate registry format with improved pattern
-          if [[ ! "$REGISTRY" =~ ^[a-zA-Z0-9.-]+(:[0-9]+)?(/[a-zA-Z0-9._-]+)*$ ]]; then
+          if [[ ! "$REGISTRY" =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?(:[0-9]+)?(/[a-zA-Z0-9._-]+)*$ ]]; then
             echo "Error: Invalid registry format: $REGISTRY"
             exit 1
           fi
