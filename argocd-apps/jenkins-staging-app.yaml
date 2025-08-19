@@ -6,7 +6,7 @@ metadata:
 spec:
   project: jenkins
   source:
-    repoURL: https://github.com/vvalderrv/jenkins-gitops
+    repoURL: https://github.com/lfit/jenkins-gitops
     targetRevision: main
     path: base/jenkins
     helm:

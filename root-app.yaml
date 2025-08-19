@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root-app-jenkins
+  name: jenkins-apps
   namespace: argocd
 spec:
   project: jenkins
   source:
-    repoURL: https://github.com/vvalderrv/jenkins-gitops.git
+    repoURL: https://github.com/lfit/jenkins-gitops
     targetRevision: main
     path: argocd-apps
   destination:
