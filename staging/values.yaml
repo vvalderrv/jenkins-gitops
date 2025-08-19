@@ -9,6 +9,20 @@ controller:
     tag: "latest"
     pullPolicy: "IfNotPresent"
 
+  # Add ingress configuration for public access
+  ingress:
+    enabled: true
+    apiVersion: networking.k8s.io/v1
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+    hostName: jenkins-stag.opensearch.cluster.linuxfound.info
+    path: /
+    tls:
+      - secretName: jenkins-staging-tls
+        hosts:
+          - jenkins-stag.opensearch.cluster.linuxfound.info
+
 # Defining resource requests and limits for the staging environment.
 resources:
   requests:
