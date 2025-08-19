@@ -5,8 +5,8 @@
 controller:
   image:
     # Using the official public Jenkins LTS image as a placeholder.
-    repository: "jenkins/jenkins"
-    tag: "lts-jdk17"
+    repository: "ghcr.io/lfit/jenkins"
+    tag: "latest"
     pullPolicy: "IfNotPresent"
 
 # Defining resource requests and limits for the staging environment.
