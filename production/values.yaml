@@ -2,60 +2,61 @@
 # Purpose: Provide Helm values customized for the Production Jenkins env
 # Description: Overrides Jenkins image, JVM opts, and JCasC env variables
 
-controller:
-  image:
-    # Using the official public Jenkins LTS image as a placeholder.
-    repository: "jenkins/jenkins"
-    tag: "lts-jdk17"
-    pullPolicy: "Always"
+jenkins:
+  controller:
+    image:
+      # Using the official public Jenkins LTS image as a placeholder.
+      repository: "jenkins/jenkins"
+      tag: "lts-jdk17"
+      pullPolicy: "Always"
 
-# Defining resource requests and limits for the production environment.
-resources:
-  requests:
-    cpu: "2000m"
-    memory: "4Gi"
-  limits:
-    cpu: "4000m"
-    memory: "8Gi"
+  # Defining resource requests and limits for the production environment.
+  resources:
+    requests:
+      cpu: "2000m"
+      memory: "4Gi"
+    limits:
+      cpu: "4000m"
+      memory: "8Gi"
 
-jenkinsJavaOpts: "-Xms4g -Xmx6g"
+  jenkinsJavaOpts: "-Xms4g -Xmx6g"
 
-jenkinsEnvVars:
-  JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Production Environment)"
-  JCASC_LOCATION_URL: ""
-  JCASC_LOCATION_ADMINADDRESS: "releng+opensearch-jenkins@linuxfoundation.org"
-  JCASC_MASTER_LABELS: "prod-controller"
-  JCASC_RESOURCE_ROOT_URL: ""
-  JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
-  JCASC_SCM_POLLING_THREADCOUNT: "10"
+  jenkinsEnvVars:
+    JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Production Environment)"
+    JCASC_LOCATION_URL: ""
+    JCASC_LOCATION_ADMINADDRESS: "releng+opensearch-jenkins@linuxfoundation.org"
+    JCASC_MASTER_LABELS: "prod-controller"
+    JCASC_RESOURCE_ROOT_URL: ""
+    JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
+    JCASC_SCM_POLLING_THREADCOUNT: "10"
 
-  JCASC_PROXY_HOST: ""
-  JCASC_PROXY_PORT: ""
-  JCASC_PROXY_USERNAME: ""
-  JCASC_PROXY_NOPROXY: ""
+    JCASC_PROXY_HOST: ""
+    JCASC_PROXY_PORT: ""
+    JCASC_PROXY_USERNAME: ""
+    JCASC_PROXY_NOPROXY: ""
 
-  JCASC_FINGERPRINT_STORAGE: ""
-  JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
+    JCASC_FINGERPRINT_STORAGE: ""
+    JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
 
-  JCASC_MAILER_SMTP_HOST: ""
-  JCASC_MAILER_SMTP_PORT: ""
-  JCASC_MAILER_USE_SSL: "false"
-  JCASC_MAILER_USE_TLS: "false"
-  JCASC_MAILER_SMTP_USERNAME: ""
-  JCASC_MAILER_DEFAULT_SUFFIX: ""
-  JCASC_MAILER_CHARSET: "UTF-8"
+    JCASC_MAILER_SMTP_HOST: ""
+    JCASC_MAILER_SMTP_PORT: ""
+    JCASC_MAILER_USE_SSL: "false"
+    JCASC_MAILER_USE_TLS: "false"
+    JCASC_MAILER_SMTP_USERNAME: ""
+    JCASC_MAILER_DEFAULT_SUFFIX: ""
+    JCASC_MAILER_CHARSET: "UTF-8"
 
-  JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
-  JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
-  JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
-  JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE: ""
-  JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
-  JCASC_JENKINSGLOBALENVVARS_GITURL: ""
-  JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
-  JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
-  JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
-  JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
-  JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
-  JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
-  JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
-  JCASC_JENKINSGLOBALENVVARS_SILO: "production"
+    JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
+    JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
+    JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
+    JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE: ""
+    JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
+    JCASC_JENKINSGLOBALENVVARS_GITURL: ""
+    JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
+    JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
+    JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
+    JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
+    JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
+    JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
+    JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
+    JCASC_JENKINSGLOBALENVVARS_SILO: "production"
