@@ -21,3 +21,4 @@ __pycache__/
 # Testing
 ./build
 /bin
+staging-kubeconfig.yaml
