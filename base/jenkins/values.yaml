@@ -20,6 +20,7 @@
 persistence:
   enabled: true
   size: 8Gi
+  storageClass: "auto-ebs-sc"
 
 serviceAccount:
   create: true
@@ -29,9 +30,10 @@ controller:
   # Use your project's org registry. Default points to LFIT shared image.
   # Replace with ghcr.io/your-org/jenkins-custom if needed.
   image:
-    registry: ""
-    repository: "ghcr.io/lfit/jenkins-custom"
-    tag: "0.7-dev"
+    # Fix: Split registry and repository correctly for ghcr.io image
+    registry: "ghcr.io"
+    repository: "lfit/jenkins"
+    tag: "latest"
     pullPolicy: "IfNotPresent"
   containerEnv:
     - name: CASC_JENKINS_CONFIG
