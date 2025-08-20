@@ -5,7 +5,8 @@
 jenkins:
   controller:
     image:
-      # Using the official public Jenkins LTS image as a placeholder.
+      # Override registry to prevent docker.io prefix
+      registry: ""
       repository: "ghcr.io/lfit/jenkins"
       tag: "latest"
       pullPolicy: "IfNotPresent"
