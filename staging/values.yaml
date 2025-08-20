@@ -5,9 +5,9 @@
 jenkins:
   controller:
     image:
-      # Override registry to prevent docker.io prefix
-      registry: ""
-      repository: "ghcr.io/lfit/jenkins"
+      # Fix: Split registry and repository correctly for ghcr.io image
+      registry: "ghcr.io"
+      repository: "lfit/jenkins"
       tag: "latest"
       pullPolicy: "IfNotPresent"
 
@@ -78,5 +78,5 @@ jenkins:
 
   persistence:
     enabled: true
-    storageClass: "gp2"
+    storageClass: "auto-ebs-sc"
     size: "20Gi"
