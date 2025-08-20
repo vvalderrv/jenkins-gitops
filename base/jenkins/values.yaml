@@ -29,6 +29,7 @@ controller:
   # Use your project's org registry. Default points to LFIT shared image.
   # Replace with ghcr.io/your-org/jenkins-custom if needed.
   image:
+    registry: ""
     repository: "ghcr.io/lfit/jenkins-custom"
     tag: "0.7-dev"
     pullPolicy: "IfNotPresent"
