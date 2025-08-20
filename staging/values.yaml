@@ -2,79 +2,80 @@
 # Purpose: Provide Helm values customized for the Staging Jenkins env
 # Description: Overrides Jenkins image, JVM opts, and JCasC env variables
 
-controller:
-  image:
-    # Using the official public Jenkins LTS image as a placeholder.
-    repository: "ghcr.io/lfit/jenkins"
-    tag: "latest"
-    pullPolicy: "IfNotPresent"
+jenkins:
+  controller:
+    image:
+      # Using the official public Jenkins LTS image as a placeholder.
+      repository: "ghcr.io/lfit/jenkins"
+      tag: "latest"
+      pullPolicy: "IfNotPresent"
 
-  # Add ingress configuration for public access
-  ingress:
+    # Add ingress configuration for public access
+    ingress:
+      enabled: true
+      apiVersion: networking.k8s.io/v1
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+      hostName: jenkins-stag.opensearch.cluster.linuxfound.info
+      path: /
+      tls:
+        - secretName: jenkins-staging-tls
+          hosts:
+            - jenkins-stag.opensearch.cluster.linuxfound.info
+
+  # Defining resource requests and limits for the staging environment.
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "2Gi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+
+  jenkinsJavaOpts: "-Xms1g -Xmx2g"
+
+  jenkinsEnvVars:
+    JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Staging Environment)"
+    JCASC_LOCATION_URL: ""
+    JCASC_LOCATION_ADMINADDRESS: "releng+opensearch-jenkins@linuxfoundation.org"
+    JCASC_MASTER_LABELS: "staging-controller"
+    JCASC_RESOURCE_ROOT_URL: ""
+    JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
+    JCASC_SCM_POLLING_THREADCOUNT: "5"
+
+    JCASC_PROXY_HOST: ""
+    JCASC_PROXY_PORT: ""
+    JCASC_PROXY_USERNAME: ""
+    JCASC_PROXY_NOPROXY: ""
+
+    JCASC_FINGERPRINT_STORAGE: ""
+    JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
+
+    JCASC_MAILER_SMTP_HOST: ""
+    JCASC_MAILER_SMTP_PORT: ""
+    JCASC_MAILER_USE_SSL: "false"
+    JCASC_MAILER_USE_TLS: "false"
+    JCASC_MAILER_SMTP_USERNAME: ""
+    JCASC_MAILER_DEFAULT_SUFFIX: ""
+    JCASC_MAILER_CHARSET: "UTF-8"
+
+    JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
+    JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
+    JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
+    JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE: ""
+    JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
+    JCASC_JENKINSGLOBALENVVARS_GITURL: ""
+    JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
+    JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
+    JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
+    JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
+    JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
+    JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
+    JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
+    JCASC_JENKINSGLOBALENVVARS_SILO: "staging"
+
+  persistence:
     enabled: true
-    apiVersion: networking.k8s.io/v1
-    ingressClassName: nginx
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt
-    hostName: jenkins-stag.opensearch.cluster.linuxfound.info
-    path: /
-    tls:
-      - secretName: jenkins-staging-tls
-        hosts:
-          - jenkins-stag.opensearch.cluster.linuxfound.info
-
-# Defining resource requests and limits for the staging environment.
-resources:
-  requests:
-    cpu: "1000m"
-    memory: "2Gi"
-  limits:
-    cpu: "2000m"
-    memory: "4Gi"
-
-jenkinsJavaOpts: "-Xms1g -Xmx2g"
-
-jenkinsEnvVars:
-  JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Staging Environment)"
-  JCASC_LOCATION_URL: ""
-  JCASC_LOCATION_ADMINADDRESS: "releng+opensearch-jenkins@linuxfoundation.org"
-  JCASC_MASTER_LABELS: "staging-controller"
-  JCASC_RESOURCE_ROOT_URL: ""
-  JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
-  JCASC_SCM_POLLING_THREADCOUNT: "5"
-
-  JCASC_PROXY_HOST: ""
-  JCASC_PROXY_PORT: ""
-  JCASC_PROXY_USERNAME: ""
-  JCASC_PROXY_NOPROXY: ""
-
-  JCASC_FINGERPRINT_STORAGE: ""
-  JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
-
-  JCASC_MAILER_SMTP_HOST: ""
-  JCASC_MAILER_SMTP_PORT: ""
-  JCASC_MAILER_USE_SSL: "false"
-  JCASC_MAILER_USE_TLS: "false"
-  JCASC_MAILER_SMTP_USERNAME: ""
-  JCASC_MAILER_DEFAULT_SUFFIX: ""
-  JCASC_MAILER_CHARSET: "UTF-8"
-
-  JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
-  JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
-  JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
-  JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE: ""
-  JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
-  JCASC_JENKINSGLOBALENVVARS_GITURL: ""
-  JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
-  JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
-  JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
-  JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
-  JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
-  JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
-  JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
-  JCASC_JENKINSGLOBALENVVARS_SILO: "staging"
-
-persistence:
-  enabled: true
-  storageClass: "gp2"
-  size: "20Gi"
+    storageClass: "gp2"
+    size: "20Gi"
