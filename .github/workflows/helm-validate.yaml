@@ -3,16 +3,20 @@ name: Validate Helm Charts and Values
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'base/jenkins/**'
-      - 'environments/**'
+      - 'staging/**'
+      - 'production/**'
+      - 'dev/**'
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - 'base/jenkins/**'
-      - 'environments/**'
+      - 'staging/**'
+      - 'production/**'
+      - 'dev/**'
 
 jobs:
   helm-validate:
@@ -20,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        env: [dev]
+        env: [dev, staging, production]
 
     steps:
       - name: Checkout repo
@@ -34,7 +38,7 @@ jobs:
       - name: Template with values.yaml (${{ matrix.env }})
         run: |
           helm template jenkins base/jenkins \
-            -f environments/${{ matrix.env }}/values.yaml > rendered-${{ matrix.env }}.yaml
+            -f ${{ matrix.env }}/values.yaml > rendered-${{ matrix.env }}.yaml
 
       - name: Show rendered output
         run: cat rendered-${{ matrix.env }}.yaml
