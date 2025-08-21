@@ -21,7 +21,7 @@ jenkins:
       pullPolicy: "IfNotPresent"
 
     JCasC:
-      defaultConfig: true
+      defaultConfig: false
       configScripts:
         00-main: |
           jenkins:
