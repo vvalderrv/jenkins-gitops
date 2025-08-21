@@ -45,9 +45,3 @@ controller:
   extraVolumeMounts:
     - name: jcasc-config
       mountPath: "/var/jenkins_home/casc_config/"
-  # Override plugin installation with compatible versions
-  installPlugins:
-    - kubernetes:4358.vcfd9c5a_0a_f51
-    - workflow-aggregator:608.v67378e9d3db_1
-    - git:5.7.0
-    - configuration-as-code:1850.va_a_8c31d3158b_
