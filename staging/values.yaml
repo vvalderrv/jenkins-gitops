@@ -15,7 +15,7 @@ jenkins:
 
     # Jenkins Configuration as Code - inherit from base values
     JCasC:
-      defaultConfig: false
+      defaultConfig: true
 
     # Add ingress configuration for public access
     ingress:
