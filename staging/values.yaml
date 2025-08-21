@@ -5,11 +5,13 @@
 jenkins:
   controller:
     image:
-      # Fix: Split registry and repository correctly for ghcr.io image
       registry: "ghcr.io"
       repository: "lfit/jenkins"
       tag: "latest"
       pullPolicy: "IfNotPresent"
+
+    # Override default plugins with empty list - use only image plugins
+    installPlugins: []
 
     # Add ingress configuration for public access
     ingress:
