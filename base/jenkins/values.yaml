@@ -1,21 +1,6 @@
 # Name: values.yaml
 # Purpose: Default Helm values for the Jenkins wrapper chart
-# Description: Sets PVC, service account, Jenkins image, and JCasC mounts
-# Fields:
-#   persistence.enabled: Enable PVC for Jenkins home directory
-#   persistence.size: PVC storage request size (e.g., 8Gi)
-#   serviceAccount.create: Create a dedicated ServiceAccount if true
-#   serviceAccount.name: Name of the ServiceAccount to use/create
-#   controller.image.repository: Jenkins Docker image repository
-#   controller.image.tag: Tag for the Jenkins image (e.g., "lts-jdk11")
-#   controller.image.pullPolicy: Image pull policy (e.g., "IfNotPresent")
-#   controller.containerEnv: Environment variables for JCasC in Jenkins
-#   controller.extraVolumes: Extra Kubernetes volumes (e.g., ConfigMap)
-#   controller.extraVolumeMounts: Mount points for extraVolumes
-# Usage:
-#   1. Update fields as required for your environment
-#   2. Open a pull request with your changes
-#   3. After PR merge, Argo CD will apply updated values
+# Description: Sets PVC, service account, Jenkins image, and JCasC configuration
 
 persistence:
   enabled: true
@@ -26,22 +11,182 @@ serviceAccount:
   create: true
   name: ""
 
-controller:
-  # Use your project's org registry. Default points to LFIT shared image.
-  # Replace with ghcr.io/your-org/jenkins-custom if needed.
-  image:
-    # Fix: Split registry and repository correctly for ghcr.io image
-    registry: "ghcr.io"
-    repository: "lfit/jenkins"
-    tag: "latest"
-    pullPolicy: "IfNotPresent"
-  containerEnv:
-    - name: CASC_JENKINS_CONFIG
-      value: "/var/jenkins_home/casc_config/"
-  extraVolumes:
-    - name: jcasc-config
-      configMap:
-        name: "{{ include \"jenkins.fullname\" . }}-jcasc-config"
-  extraVolumeMounts:
-    - name: jcasc-config
-      mountPath: "/var/jenkins_home/casc_config/"
+# Pass all configuration to Jenkins subchart
+jenkins:
+  controller:
+    image:
+      registry: "ghcr.io"
+      repository: "lfit/jenkins"
+      tag: "latest"
+      pullPolicy: "IfNotPresent"
+
+    JCasC:
+      defaultConfig: true
+      configScripts:
+        00-main: |
+          jenkins:
+            systemMessage: "${JCASC_SYSTEM_MESSAGE}"
+            numExecutors: 0
+            quietPeriod: 5
+            scmCheckoutRetryCount: 0
+            primaryView: "all"
+            views:
+              - all:
+                  name: "all"
+            mode: EXCLUSIVE
+            labelString: "${JCASC_MASTER_LABELS}"
+            projectNamingStrategy: "standard"
+            noUsageStatistics: true
+            proxy:
+              name: "${JCASC_PROXY_HOST}"
+              port: ${JCASC_PROXY_PORT}
+              userName: "${JCASC_PROXY_USERNAME}"
+              noProxyHost: "${JCASC_PROXY_NOPROXY}"
+          unclassified:
+            location:
+              url: "${JCASC_LOCATION_URL}"
+              adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
+            mailer:
+              smtpHost: "${JCASC_MAILER_SMTP_HOST}"
+              smtpPort: ${JCASC_MAILER_SMTP_PORT:-0}
+              useSsl: "${JCASC_MAILER_USE_SSL}"
+              useTls: "${JCASC_MAILER_USE_TLS}"
+              authentication:
+                username: "${JCASC_MAILER_SMTP_USERNAME}"
+              defaultSuffix: "${JCASC_MAILER_DEFAULT_SUFFIX}"
+              charset: "${JCASC_MAILER_CHARSET}"
+            pollSCM:
+              pollingThreadCount: ${JCASC_SCM_POLLING_THREADCOUNT}
+
+        01-global-env-vars: |
+          jenkins:
+            globalNodeProperties:
+            - envVars:
+                env:
+                - key: "GLOBAL_LOG_LEVEL"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_LOGLEVEL}'
+                - key: "ARTIFACTORY_URL"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL}'
+                - key: "COMPANY_NAME"
+                  value: "OpenSearch Project"
+                - key: "DOCKER_REGISTRY"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY}'
+                - key: "GERRIT_URL"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE}/$PROJECT'
+                - key: "GIT_BASE"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_GITBASEURL}/$PROJECT'
+                - key: "GIT_URL"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_GITURL}'
+                - key: "PACKAGECLOUDPROXY"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY}'
+                - key: "PCIO_CO"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_PCIOCO}'
+                - key: "RELEASE_EMAIL"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL}'
+                - key: "RELEASE_USERNAME"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME}'
+                - key: "S3_BUCKET"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_S3BUCKET}'
+                - key: "CDN_URL"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_CDNURL}'
+                - key: "SIGUL_KEY"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_SIGULKEY}'
+                - key: "SILO"
+                  value: '${JCASC_JENKINSGLOBALENVVARS_SILO}'
+
+        02-security: |
+          jenkins:
+            securityRealm:
+              local:
+                allowsSignup: false
+                users:
+                  - id: "admin"
+                    password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
+            authorizationStrategy:
+              loggedInUsersCanDoAnything:
+                allowAnonymousRead: false
+
+        03-tools: |
+          tool:
+            jdk:
+              installations:
+                - name: "jdk-17"
+                  home: "/opt/java/openjdk"
+            maven:
+              installations:
+                - name: "mvn38"
+                  properties:
+                    - installSource:
+                        installers:
+                          - maven:
+                              id: "3.8.3"
+                - name: "mvn36"
+                  properties:
+                    - installSource:
+                        installers:
+                          - maven:
+                              id: "3.6.3"
+            nodejs:
+              installations:
+                - name: "nodejs14"
+                  properties:
+                    - installSource:
+                        installers:
+                          - nodeJSInstaller:
+                              id: "14.17.1"
+            git:
+              installations:
+                - name: "Default"
+                  home: "git"
+
+        04-global-libraries: |
+          # Jenkins global pipeline library configurations placeholder
+
+        05-plugins-config: |
+          unclassified:
+            gerrit-trigger:
+              servers:
+                - name: "placeholder-gerrit"
+                  noConnectionOnStartup: true
+                  config:
+                    gerritHostName: "gerrit.example.com"
+                    gerritSshPort: "29418"
+                    gerritUserName: "jenkins-gerrit-user"
+                    gerritFrontEndUrl: "http://gerrit.example.com"
+            gitHubConfiguration:
+              apiRateLimitChecker: ThrottleForNormalize
+            gitHubPluginConfig:
+              configs:
+                - name: "opensearch-project"
+                  credentialsId: "github-api-token-placeholder"
+              hookUrl: "http://jenkins.placeholder.example.com/github-webhook/"
+            ghprbTrigger:
+              cron: "H/5 * * * *"
+              githubAuth:
+                - id: "opensearch-project-ghprb-auth"
+                  serverAPIUrl: "https://api.github.com"
+                  credentialsId: "github-api-token-placeholder"
+                  description: "GitHub auth for opensearch-project PR builder"
+              adminlist: ""
+              manageWebhooks: false
+              okToTestPhrase: ".*ok to test.*"
+              retestPhrase: ".*test this please.*"
+              skipBuildPhrase: ".*\\[skip ci\\].*"
+
+        06-credentials: |
+          # Jenkins credential configurations placeholder
+
+        07-cloud-agents: |
+          jenkins:
+            clouds:
+              - amazonEC2:
+                  name: "aws-ec2-test"
+                  region: "us-east-1"
+                  credentialsId: "placeholder"
+                  instanceCapStr: "0"
+                  useInstanceProfileForCredentials: false
+                  privateKey: ""
+                  sshKeysCredentialsId: ""
+                  templates: []
+                  roleArn: ""
+                  roleSessionName: ""
