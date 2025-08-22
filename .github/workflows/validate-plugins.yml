@@ -21,39 +21,41 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate plugins.txt syntax
+      - name: Create clean plugins file
         run: |
-          echo "Checking plugins.txt syntax..."
+          echo "Creating clean plugins file..."
 
-          # Create a temporary file with only non-comment, non-empty lines
-          grep -v "^[[:space:]]*#" build/plugins.txt | grep -v "^[[:space:]]*$" > /tmp/plugins-clean.txt
+          # Create a clean file with only non-comment, non-empty lines
+          grep -v "^[[:space:]]*#" build/plugins.txt | grep -v "^[[:space:]]*$" > plugins-clean.txt
 
           # Check if we have any plugins after filtering
-          if [ ! -s /tmp/plugins-clean.txt ]; then
+          if [ ! -s plugins-clean.txt ]; then
             echo "Error: No valid plugin entries found in plugins.txt"
             exit 1
           fi
 
+          echo "Found $(wc -l < plugins-clean.txt) valid plugin entries"
+
+      - name: Validate plugins.txt syntax
+        run: |
+          echo "Checking plugins.txt syntax..."
+
           # Check for proper plugin format (plugin-name:version or plugin-name)
           # Only validate non-comment, non-empty lines
-          if grep -qv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" /tmp/plugins-clean.txt; then
+          if grep -qv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" plugins-clean.txt; then
             echo "Error: Invalid plugin format found"
             echo "Invalid lines:"
-            grep -nv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" /tmp/plugins-clean.txt
+            grep -nv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" plugins-clean.txt
             exit 1
           fi
 
           echo "plugins.txt syntax is valid"
-          echo "Found $(wc -l < /tmp/plugins-clean.txt) valid plugin entries"
 
       - name: Test plugin installation
         run: |
           echo "Testing plugin installation with Jenkins..."
 
-          # Create clean plugins file without comments and empty lines
-          grep -v "^[[:space:]]*#" build/plugins.txt | grep -v "^[[:space:]]*$" > plugins-clean.txt
-
-          # Create minimal test Dockerfile
+          # Create minimal test Dockerfile using the existing clean plugins file
           cat > Dockerfile.test << 'EOF'
           FROM jenkins/jenkins:2.492.3-lts-jdk21
           USER root
