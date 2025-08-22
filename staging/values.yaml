@@ -15,7 +15,7 @@ jenkins:
 
     # Jenkins Configuration as Code - inherit from base values
     JCasC:
-      defaultConfig: true
+      defaultConfig: false
 
     # Environment variables for Jenkins container (JCasC configuration)
     containerEnv:
@@ -85,6 +85,14 @@ jenkins:
         value: ""
       - name: JCASC_JENKINSGLOBALENVVARS_SILO
         value: "staging"
+
+      # Kubernetes Cloud Configuration
+      - name: JCASC_KUBERNETES_NAMESPACE
+        value: "jenkins-staging"
+      - name: JCASC_KUBERNETES_JENKINS_URL
+        value: "http://jenkins-staging.jenkins-staging.svc.cluster.local:8080"
+      - name: JCASC_KUBERNETES_JENKINS_TUNNEL
+        value: "jenkins-staging-agent.jenkins-staging.svc.cluster.local:50000"
 
     # Add ingress configuration for public access
     ingress:

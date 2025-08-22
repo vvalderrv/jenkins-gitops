@@ -25,7 +25,7 @@ jenkins:
     executorMode: EXCLUSIVE
 
     JCasC:
-      defaultConfig: true
+      defaultConfig: false
       configScripts:
 
         01-global-env-vars: |
@@ -114,7 +114,5 @@ jenkins:
           # Jenkins credential configurations placeholder
 
         07-cloud-agents: |
-          jenkins:
-            clouds: []
-            # Kubernetes cloud configuration will be added later
-            # when configuring build agents as pods
+          # Cloud agents configuration moved to separate jcasc_yamls file
+          # See: base/jenkins/jcasc_yamls/07-cloud-agents.yaml
