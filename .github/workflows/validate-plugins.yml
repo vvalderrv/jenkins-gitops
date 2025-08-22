@@ -21,19 +21,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate plugins.txt syntax
+      - name: Create clean plugins file
         run: |
-          echo "Checking plugins.txt syntax..."
-          # Check for empty lines and malformed entries
-          if grep -q "^[[:space:]]*$" build/plugins.txt; then
-            echo "Error: Found empty lines in plugins.txt"
+          echo "Creating clean plugins file..."
+
+          # Create a clean file with only non-comment, non-empty lines
+          grep -v "^[[:space:]]*#" build/plugins.txt | grep -v "^[[:space:]]*$" > plugins-clean.txt
+
+          # Check if we have any plugins after filtering
+          if [ ! -s plugins-clean.txt ]; then
+            echo "Error: No valid plugin entries found in plugins.txt"
             exit 1
           fi
 
+          echo "Found $(wc -l < plugins-clean.txt) valid plugin entries"
+
+      - name: Validate plugins.txt syntax
+        run: |
+          echo "Checking plugins.txt syntax..."
+
           # Check for proper plugin format (plugin-name:version or plugin-name)
-          if grep -qv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" build/plugins.txt; then
+          # Only validate non-comment, non-empty lines
+          if grep -qv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" plugins-clean.txt; then
             echo "Error: Invalid plugin format found"
-            grep -nv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" build/plugins.txt
+            echo "Invalid lines:"
+            grep -nv "^[a-zA-Z0-9][a-zA-Z0-9._-]*\(:[a-zA-Z0-9._-]*\)\?$" plugins-clean.txt
             exit 1
           fi
 
@@ -43,11 +55,11 @@ jobs:
         run: |
           echo "Testing plugin installation with Jenkins..."
 
-          # Create minimal test Dockerfile
+          # Create minimal test Dockerfile using the existing clean plugins file
           cat > Dockerfile.test << 'EOF'
           FROM jenkins/jenkins:2.492.3-lts-jdk21
           USER root
-          COPY build/plugins.txt /tmp/plugins.txt
+          COPY plugins-clean.txt /tmp/plugins.txt
           USER jenkins
           RUN jenkins-plugin-cli --verbose --plugin-file /tmp/plugins.txt
           EOF
