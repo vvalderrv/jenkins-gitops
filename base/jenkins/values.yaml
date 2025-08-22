@@ -80,28 +80,6 @@ jenkins:
               installations:
                 - name: "jdk-17"
                   home: "/opt/java/openjdk"
-            maven:
-              installations:
-                - name: "mvn38"
-                  properties:
-                    - installSource:
-                        installers:
-                          - maven:
-                              id: "3.8.3"
-                - name: "mvn36"
-                  properties:
-                    - installSource:
-                        installers:
-                          - maven:
-                              id: "3.6.3"
-            nodejs:
-              installations:
-                - name: "nodejs14"
-                  properties:
-                    - installSource:
-                        installers:
-                          - nodeJSInstaller:
-                              id: "14.17.1"
             git:
               installations:
                 - name: "Default"
