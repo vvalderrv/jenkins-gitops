@@ -41,8 +41,6 @@ jenkins:
                   value: "OpenSearch Project"
                 - key: "DOCKER_REGISTRY"
                   value: '${JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY}'
-                - key: "GERRIT_URL"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_GERRITURLBASE}/$PROJECT'
                 - key: "GIT_BASE"
                   value: '${JCASC_JENKINSGLOBALENVVARS_GITBASEURL}/$PROJECT'
                 - key: "GIT_URL"
@@ -114,15 +112,6 @@ jenkins:
 
         05-plugins-config: |
           unclassified:
-            gerrit-trigger:
-              servers:
-                - name: "placeholder-gerrit"
-                  noConnectionOnStartup: true
-                  config:
-                    gerritHostName: "gerrit.example.com"
-                    gerritSshPort: "29418"
-                    gerritUserName: "jenkins-gerrit-user"
-                    gerritFrontEndUrl: "http://gerrit.example.com"
             gitHubConfiguration:
               apiRateLimitChecker: ThrottleForNormalize
             gitHubPluginConfig:

@@ -35,6 +35,14 @@ jobs:
         with:
           version: v3.13.2
 
+      - name: Add Jenkins Helm repository
+        run: helm repo add jenkins https://charts.jenkins.io
+
+      - name: Build Helm dependencies
+        run: |
+          cd base/jenkins
+          helm dependency build
+
       - name: Template with values.yaml (${{ matrix.env }})
         run: |
           helm template jenkins base/jenkins \
