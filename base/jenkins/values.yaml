@@ -20,6 +20,8 @@ jenkins:
       tag: "latest"
       pullPolicy: "IfNotPresent"
 
+    executorMode: EXCLUSIVE
+
     JCasC:
       defaultConfig: true
       configScripts:
@@ -33,7 +35,6 @@ jenkins:
             views:
               - all:
                   name: "all"
-            mode: EXCLUSIVE
             labelString: "${JCASC_MASTER_LABELS}"
             projectNamingStrategy: "standard"
             noUsageStatistics: true
