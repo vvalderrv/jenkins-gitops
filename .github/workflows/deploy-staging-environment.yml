@@ -27,15 +27,15 @@ jobs:
         run: |
           echo "Updating staging/values.yaml to use latest image tag"
 
-          # Determine registry based on repository
+          # Determine repository name (without registry prefix)
           if [[ "${{ github.repository }}" == "lfit/jenkins-gitops" ]]; then
-            REGISTRY="ghcr.io/lfit/jenkins"
+            REPOSITORY="lfit/jenkins"
           else
-            REGISTRY="ghcr.io/${{ github.repository_owner }}/jenkins"
+            REPOSITORY="${{ github.repository_owner }}/jenkins"
           fi
 
           # Update repository but keep tag as "latest" for staging
-          sed -i "s|repository: \".*\"|repository: \"$REGISTRY\"|g" staging/values.yaml
+          sed -i "s|repository: \".*\"|repository: \"$REPOSITORY\"|g" staging/values.yaml
           sed -i "s|tag: \".*\"|tag: \"latest\"|g" staging/values.yaml
 
           echo "Updated staging/values.yaml to use latest tag:"
