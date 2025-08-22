@@ -1,20 +1,6 @@
 # This file is for plugin-specific configurations.
-# It includes placeholders for Gerrit Trigger and GitHub integrations.
-# These placeholders use generic values and settings intended to be safe for a
-# development environment and prevent unintended interactions with live systems.
-# Actual credentials (e.g., 'github-api-token-placeholder') need to be defined
-# securely elsewhere (e.g., in 06-credentials.yaml via environment variables).
+#
 unclassified:
-  gerrit-trigger:
-    servers:
-      - name: "placeholder-gerrit"
-        noConnectionOnStartup: true
-        config:
-          gerritHostName: "gerrit.example.com"
-          gerritSshPort: "29418"
-          gerritUserName: "jenkins-gerrit-user"
-          gerritFrontEndUrl: "http://gerrit.example.com"
-
   gitHubConfiguration:
     apiRateLimitChecker: ThrottleForNormalize
 
