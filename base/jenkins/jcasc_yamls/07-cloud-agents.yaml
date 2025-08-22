@@ -1,4 +1,18 @@
 jenkins:
-  clouds: []
-  # Kubernetes cloud configuration will be added later
-  # when configuring build agents as pods
+  clouds:
+    - kubernetes:
+        name: "kubernetes"
+        serverUrl: "https://kubernetes.default.svc.cluster.local"
+        namespace: "${JCASC_KUBERNETES_NAMESPACE}"
+        # credentialsId is intentionally empty to use the default service account
+        # of the Jenkins pod for Kubernetes API authentication
+        credentialsId: ""
+        jenkinsUrl: "${JCASC_KUBERNETES_JENKINS_URL}"
+        jenkinsTunnel: "${JCASC_KUBERNETES_JENKINS_TUNNEL}"
+        containerCapStr: "100"
+        maxRequestsPerHostStr: "32"
+        retentionTimeout: 5
+        connectTimeout: 10
+        readTimeout: 20
+        usageRestricted: false
+        templates: []
