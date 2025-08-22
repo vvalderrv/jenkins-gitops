@@ -20,44 +20,13 @@ jenkins:
       tag: "latest"
       pullPolicy: "IfNotPresent"
 
+    # Use native chart fields instead of JCasC to avoid conflicts
+    numExecutors: 0
     executorMode: EXCLUSIVE
 
     JCasC:
       defaultConfig: true
       configScripts:
-        00-main: |
-          jenkins:
-            systemMessage: "${JCASC_SYSTEM_MESSAGE}"
-            numExecutors: 0
-            quietPeriod: 5
-            scmCheckoutRetryCount: 0
-            primaryView: "all"
-            views:
-              - all:
-                  name: "all"
-            labelString: "${JCASC_MASTER_LABELS}"
-            projectNamingStrategy: "standard"
-            noUsageStatistics: true
-            proxy:
-              name: "${JCASC_PROXY_HOST}"
-              port: ${JCASC_PROXY_PORT}
-              userName: "${JCASC_PROXY_USERNAME}"
-              noProxyHost: "${JCASC_PROXY_NOPROXY}"
-          unclassified:
-            location:
-              url: "${JCASC_LOCATION_URL}"
-              adminAddress: "${JCASC_LOCATION_ADMINADDRESS}"
-            mailer:
-              smtpHost: "${JCASC_MAILER_SMTP_HOST}"
-              smtpPort: ${JCASC_MAILER_SMTP_PORT:-0}
-              useSsl: "${JCASC_MAILER_USE_SSL}"
-              useTls: "${JCASC_MAILER_USE_TLS}"
-              authentication:
-                username: "${JCASC_MAILER_SMTP_USERNAME}"
-              defaultSuffix: "${JCASC_MAILER_DEFAULT_SUFFIX}"
-              charset: "${JCASC_MAILER_CHARSET}"
-            pollSCM:
-              pollingThreadCount: ${JCASC_SCM_POLLING_THREADCOUNT}
 
         01-global-env-vars: |
           jenkins:
