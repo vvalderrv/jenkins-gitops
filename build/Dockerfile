@@ -7,7 +7,7 @@ ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
 # Copy the plugins.txt file
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 
-# Switch to root for installations
+# Switch to root for install
 USER root
 
 # Install system packages and dependencies
