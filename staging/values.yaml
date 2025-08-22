@@ -17,6 +17,75 @@ jenkins:
     JCasC:
       defaultConfig: true
 
+    # Environment variables for Jenkins container (JCasC configuration)
+    containerEnv:
+      - name: JCASC_SYSTEM_MESSAGE
+        value: "Welcome to Jenkins (Staging Environment)"
+      - name: JCASC_LOCATION_URL
+        value: ""
+      - name: JCASC_LOCATION_ADMINADDRESS
+        value: "releng+opensearch-jenkins@linuxfoundation.org"
+      - name: JCASC_MASTER_LABELS
+        value: "staging-controller"
+      - name: JCASC_RESOURCE_ROOT_URL
+        value: ""
+      - name: JCASC_DISABLE_DEFERRED_WIPEOUT
+        value: "false"
+      - name: JCASC_SCM_POLLING_THREADCOUNT
+        value: "5"
+      - name: JCASC_PROXY_HOST
+        value: ""
+      - name: JCASC_PROXY_PORT
+        value: ""
+      - name: JCASC_PROXY_USERNAME
+        value: ""
+      - name: JCASC_PROXY_NOPROXY
+        value: ""
+      - name: JCASC_FINGERPRINT_STORAGE
+        value: ""
+      - name: JCASC_FINGERPRINT_CLEANUP_PERIOD
+        value: ""
+      - name: JCASC_MAILER_SMTP_HOST
+        value: ""
+      - name: JCASC_MAILER_SMTP_PORT
+        value: ""
+      - name: JCASC_MAILER_USE_SSL
+        value: "false"
+      - name: JCASC_MAILER_USE_TLS
+        value: "false"
+      - name: JCASC_MAILER_SMTP_USERNAME
+        value: ""
+      - name: JCASC_MAILER_DEFAULT_SUFFIX
+        value: ""
+      - name: JCASC_MAILER_CHARSET
+        value: "UTF-8"
+      - name: JCASC_JENKINSGLOBALENVVARS_LOGLEVEL
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_GITBASEURL
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_GITURL
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_PCIOCO
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_S3BUCKET
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_CDNURL
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_SIGULKEY
+        value: ""
+      - name: JCASC_JENKINSGLOBALENVVARS_SILO
+        value: "staging"
+
     # Add ingress configuration for public access
     ingress:
       enabled: true
@@ -41,41 +110,6 @@ jenkins:
       memory: "4Gi"
 
   jenkinsJavaOpts: "-Xms1g -Xmx2g"
-
-  jenkinsEnvVars:
-    JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Staging Environment)"
-    JCASC_LOCATION_URL: ""
-    JCASC_LOCATION_ADMINADDRESS: "releng+opensearch-jenkins@linuxfoundation.org"
-    JCASC_MASTER_LABELS: "staging-controller"
-    JCASC_RESOURCE_ROOT_URL: ""
-    JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
-    JCASC_SCM_POLLING_THREADCOUNT: "5"
-    JCASC_PROXY_HOST: ""
-    JCASC_PROXY_PORT: ""
-    JCASC_PROXY_USERNAME: ""
-    JCASC_PROXY_NOPROXY: ""
-    JCASC_FINGERPRINT_STORAGE: ""
-    JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
-    JCASC_MAILER_SMTP_HOST: ""
-    JCASC_MAILER_SMTP_PORT: ""
-    JCASC_MAILER_USE_SSL: "false"
-    JCASC_MAILER_USE_TLS: "false"
-    JCASC_MAILER_SMTP_USERNAME: ""
-    JCASC_MAILER_DEFAULT_SUFFIX: ""
-    JCASC_MAILER_CHARSET: "UTF-8"
-    JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
-    JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
-    JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
-    JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
-    JCASC_JENKINSGLOBALENVVARS_GITURL: ""
-    JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
-    JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
-    JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
-    JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
-    JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
-    JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
-    JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
-    JCASC_JENKINSGLOBALENVVARS_SILO: "staging"
 
   persistence:
     enabled: true
