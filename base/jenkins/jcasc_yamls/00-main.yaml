@@ -1,7 +1,6 @@
 ---
 jenkins:
   systemMessage: "${JCASC_SYSTEM_MESSAGE}"
-  # numExecutors: 0  # Removed - handled by controller.numExecutors in values.yaml
   quietPeriod: 5
   scmCheckoutRetryCount: 0
   primaryView: "all"
@@ -9,20 +8,12 @@ jenkins:
     - all:
         name: "all"
   labelString: "${JCASC_MASTER_LABELS}"
-  # projectNamingStrategy: "standard"  # Removed - handled by controller.projectNamingStrategy in chart defaults
-  # resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
   noUsageStatistics: true
-  #  disableDeferredWipeout: "${JCASC_DISABLE_DEFERRED_WIPEOUT}"
-  #  pipelineDurability:
-  #    defaultDurability: NONE
   proxy:
     name: "${JCASC_PROXY_HOST}"
     port: ${JCASC_PROXY_PORT}
     userName: "${JCASC_PROXY_USERNAME}"
     noProxyHost: "${JCASC_PROXY_NOPROXY}"
-#  fingerprintConfig:
-#    fingerprintStorage: "${JCASC_FINGERPRINT_STORAGE}"
-#    fingerprintCleanupPeriod: ${JCASC_FINGERPRINT_CLEANUP_PERIOD}
 
 unclassified:
   location:

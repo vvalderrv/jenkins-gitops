@@ -26,8 +26,6 @@ jenkins:
 
     JCasC:
       defaultConfig: true
-      # Remove duplicated configs - these are handled by separate jcasc_yamls files
-      # Keeping defaultConfig: true for Kubernetes cloud setup as recommended by Robert
       configScripts:
 
         01-global-env-vars: |
