@@ -1,7 +1,7 @@
 ---
 jenkins:
   systemMessage: "${JCASC_SYSTEM_MESSAGE}"
-  numExecutors: 0
+  # numExecutors: 0  # Removed - handled by controller.numExecutors in values.yaml
   quietPeriod: 5
   scmCheckoutRetryCount: 0
   primaryView: "all"
@@ -9,7 +9,7 @@ jenkins:
     - all:
         name: "all"
   labelString: "${JCASC_MASTER_LABELS}"
-  projectNamingStrategy: "standard"
+  # projectNamingStrategy: "standard"  # Removed - handled by controller.projectNamingStrategy in chart defaults
   # resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
   noUsageStatistics: true
   #  disableDeferredWipeout: "${JCASC_DISABLE_DEFERRED_WIPEOUT}"
