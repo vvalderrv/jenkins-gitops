@@ -8,7 +8,6 @@ jenkins:
   views:
     - all:
         name: "all"
-  mode: EXCLUSIVE
   labelString: "${JCASC_MASTER_LABELS}"
   projectNamingStrategy: "standard"
   # resourceRootURL: "${JCASC_RESOURCE_ROOT_URL}"
