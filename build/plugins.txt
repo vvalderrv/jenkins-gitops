@@ -1,4 +1,4 @@
-# Jenkins plugins
+# Jenkins installed plugins
 
 durable-task
 ace-editor
