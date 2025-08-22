@@ -8,6 +8,7 @@ audit-trail
 aws-credentials
 aws-java-sdk-cloudformation
 aws-secrets-manager-credentials-provider
+kubernetes
 build-timeout
 build-timestamp
 build-with-parameters

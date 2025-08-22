@@ -1,13 +1,4 @@
 jenkins:
-  clouds:
-    - amazonEC2:
-        name: "aws-ec2-test"
-        region: "us-east-1"
-        credentialsId: "placeholder"
-        instanceCapStr: "0"
-        useInstanceProfileForCredentials: false
-        privateKey: ""
-        sshKeysCredentialsId: ""
-        templates: []
-        roleArn: ""
-        roleSessionName: ""
+  clouds: []
+  # Kubernetes cloud configuration will be added later
+  # when configuring build agents as pods
