@@ -6,7 +6,7 @@ jenkins:
   controller:
     image:
       registry: "ghcr.io"
-      repository: "ghcr.io/lfit/jenkins"
+      repository: "lfit/jenkins"
       tag: "latest"
       pullPolicy: "IfNotPresent"
 
