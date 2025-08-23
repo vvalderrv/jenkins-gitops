@@ -71,8 +71,15 @@ jenkins:
                   - id: "admin"
                     password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
             authorizationStrategy:
-              loggedInUsersCanDoAnything:
-                allowAnonymousRead: false
+              projectMatrix:
+                permissions:
+                  - "Overall/Administer:admin"
+                  - "Overall/Read:authenticated"
+                  - "Job/Build:authenticated"
+                  - "Job/Cancel:authenticated"
+                  - "Job/Read:authenticated"
+                  - "Job/Workspace:authenticated"
+                  - "View/Read:authenticated"
 
         03-tools: |
           tool:
@@ -116,3 +123,7 @@ jenkins:
         07-cloud-agents: |
           # Cloud agents configuration moved to separate jcasc_yamls file
           # See: base/jenkins/jcasc_yamls/07-cloud-agents.yaml
+
+# Network security configuration
+networkPolicy:
+  enabled: true

@@ -8,5 +8,12 @@ jenkins:
         - id: "admin"
           password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
   authorizationStrategy:
-    loggedInUsersCanDoAnything:
-      allowAnonymousRead: false
+    projectMatrix:
+      permissions:
+        - "Overall/Administer:admin"
+        - "Overall/Read:authenticated"
+        - "Job/Build:authenticated"
+        - "Job/Cancel:authenticated"
+        - "Job/Read:authenticated"
+        - "Job/Workspace:authenticated"
+        - "View/Read:authenticated"
