@@ -29,7 +29,7 @@ jenkins:
       - name: JCASC_SYSTEM_MESSAGE
         value: "Welcome to Jenkins (Staging Environment)"
       - name: JCASC_LOCATION_URL
-        value: ""
+        value: "https://jenkins-stag.opensearch.cluster.linuxfound.info"
       - name: JCASC_LOCATION_ADMINADDRESS
         value: "releng+opensearch-jenkins@linuxfoundation.org"
       - name: JCASC_MASTER_LABELS
