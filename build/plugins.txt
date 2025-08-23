@@ -38,6 +38,7 @@ ldap
 lockable-resources
 login-theme
 managed-scripts
+matrix-auth
 nodelabelparameter
 nvm-wrapper
 oic-auth
