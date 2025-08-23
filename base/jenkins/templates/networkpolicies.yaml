@@ -1,0 +1,186 @@
+{{- if .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "jenkins.fullname" . }}-default-deny
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: network-security
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "jenkins.fullname" . }}-controller-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: network-security
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: jenkins-controller
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow NGINX ingress controller to reach Jenkins web UI
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow Jenkins agents to connect to controller
+  - from:
+    - podSelector:
+        matchLabels:
+          jenkins: slave
+    ports:
+    - protocol: TCP
+      port: 50000
+  # Allow same namespace communication (config reload sidecar)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Release.Namespace }}
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "jenkins.fullname" . }}-controller-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: network-security
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "jenkins.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: jenkins-controller
+  policyTypes:
+  - Egress
+  egress:
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow Kubernetes API access
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow HTTPS outbound for plugins/updates
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow HTTP outbound for legacy plugins
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
+  # Allow agent communication
+  - to:
+    - podSelector:
+        matchLabels:
+          jenkins: slave
+    ports:
+    - protocol: TCP
+      port: 50000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "jenkins.fullname" . }}-agent-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: network-security
+spec:
+  podSelector:
+    matchLabels:
+      jenkins: slave
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow Jenkins controller to communicate with agents
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "jenkins.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: jenkins-controller
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "jenkins.fullname" . }}-agent-egress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/component: network-security
+spec:
+  podSelector:
+    matchLabels:
+      jenkins: slave
+  policyTypes:
+  - Egress
+  egress:
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow communication back to Jenkins controller
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "jenkins.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: jenkins-controller
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 50000
+  # Allow HTTPS outbound for git, docker registry, etc.
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow HTTP outbound for legacy systems
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
+  # Allow SSH for git operations
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 22
+{{- end -}}
