@@ -2,17 +2,46 @@ jenkins:
   clouds:
     - kubernetes:
         name: "kubernetes"
-        serverUrl: "https://kubernetes.default.svc.cluster.local"
-        namespace: "${JCASC_KUBERNETES_NAMESPACE}"
+        serverUrl: "${JCASC_KUBERNETES_URL:-https://kubernetes.default.svc.cluster.local}"
+        namespace: "${JCASC_KUBERNETES_NAMESPACE:-default}"
         # credentialsId is intentionally empty to use the default service account
         # of the Jenkins pod for Kubernetes API authentication
         credentialsId: ""
-        jenkinsUrl: "${JCASC_KUBERNETES_JENKINS_URL}"
-        jenkinsTunnel: "${JCASC_KUBERNETES_JENKINS_TUNNEL}"
-        containerCapStr: "100"
+        jenkinsUrl: "${JCASC_KUBERNETES_JENKINS_URL:-http://jenkins:8080}"
+        jenkinsTunnel: "${JCASC_KUBERNETES_JENKINS_TUNNEL:-jenkins:50000}"
+        # Fixed: containerCap must be integer, not string (was containerCapStr)
+        containerCap: 10
         maxRequestsPerHostStr: "32"
-        retentionTimeout: 5
+        # Match live configuration: 180 seconds (3 minutes)
+        retentionTimeout: 180
         connectTimeout: 10
         readTimeout: 20
+        # Wait time for pod readiness (10 minutes)
+        waitForPodSec: 600
         usageRestricted: false
-        templates: []
+        # Enable garbage collection for orphan pod cleanup (timeout in seconds)
+        garbageCollection:
+          timeout: 300
+        # Enhanced pod labels for better resource management
+        podLabels:
+          - key: "jenkins"
+            value: "slave"
+          - key: "app.kubernetes.io/managed-by"
+            value: "jenkins"
+          - key: "app.kubernetes.io/part-of"
+            value: "cicd"
+        templates:
+          - name: "default-agent"
+            label: "kubernetes"
+            nodeUsageMode: "NORMAL"
+            containers:
+              - name: "jnlp"
+                image: "jenkins/inbound-agent:latest"
+                args: "^${computer.jnlpmac} ^${computer.name}"
+                resourceRequestCpu: "200m"
+                resourceRequestMemory: "256Mi"
+                resourceLimitCpu: "500m"
+                resourceLimitMemory: "512Mi"
+            podRetention: "default"
+            activeDeadlineSeconds: 3600
+            idleMinutes: 5

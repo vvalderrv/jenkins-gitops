@@ -87,6 +87,8 @@ jenkins:
         value: "staging"
 
       # Kubernetes Cloud Configuration
+      - name: JCASC_KUBERNETES_URL
+        value: "https://kubernetes.default.svc.cluster.local"
       - name: JCASC_KUBERNETES_NAMESPACE
         value: "jenkins-staging"
       - name: JCASC_KUBERNETES_JENKINS_URL
