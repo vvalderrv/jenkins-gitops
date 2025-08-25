@@ -19,6 +19,9 @@ jenkins:
 
     # Environment variables for Jenkins container (JCasC configuration)
     containerEnv:
+      # JCasC Configuration Path Override (fix for image default mismatch)
+      - name: CASC_JENKINS_CONFIG
+        value: "/var/jenkins_home/casc_configs"
       # Security Configuration
       - name: JCASC_JENKINSSECURITY_ADMINPASSWORD
         valueFrom:
