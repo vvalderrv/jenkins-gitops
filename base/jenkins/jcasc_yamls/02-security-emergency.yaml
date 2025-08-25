@@ -18,7 +18,7 @@ jenkins:
       users:
         - id: "lf-jenkins"
           name: "LF Jenkins Emergency Admin"
-          email: "releng+opensearch-jenkins@linuxfoundation.org"
+          email: '${JCASC_EMERGENCY_ADMIN_EMAIL}'
           password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
   authorizationStrategy:
     projectMatrix:
