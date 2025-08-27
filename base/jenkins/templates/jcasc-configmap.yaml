@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "jenkins.labels" . | nindent 4 }}
     app.kubernetes.io/component: jcasc
-    {{ include "jenkins.fullname" . }}-jenkins-config: "true"
+    {{ template "jenkins.fullname" . }}-jenkins-config: "true"
 data:
 {{- $files := .Files.Glob "jcasc_yamls/*.yaml" }}
 {{- range $path, $_ := $files }}
