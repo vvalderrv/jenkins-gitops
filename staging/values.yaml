@@ -19,24 +19,11 @@ jenkins:
 
     # Environment variables for Jenkins container (JCasC configuration)
     containerEnv:
-      # JCasC Configuration Path Override (fix for image default mismatch)
-      - name: CASC_JENKINS_CONFIG
-        value: "/var/jenkins_home/casc_configs"
-      # Security Configuration
-      - name: JCASC_JENKINSSECURITY_ADMINPASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: jenkins-staging
-            key: jenkins-admin-password
-      # System Configuration
       - name: JCASC_SYSTEM_MESSAGE
         value: "Welcome to Jenkins (Staging Environment)"
       - name: JCASC_LOCATION_URL
-        value: "https://jenkins-stag.opensearch.cluster.linuxfound.info"
+        value: ""
       - name: JCASC_LOCATION_ADMINADDRESS
-        value: "releng+opensearch-jenkins@linuxfoundation.org"
-      # Emergency Admin Email (used in 02-security-emergency.yaml)
-      - name: JCASC_EMERGENCY_ADMIN_EMAIL
         value: "releng+opensearch-jenkins@linuxfoundation.org"
       - name: JCASC_MASTER_LABELS
         value: "staging-controller"
@@ -98,12 +85,6 @@ jenkins:
         value: ""
       - name: JCASC_JENKINSGLOBALENVVARS_SILO
         value: "staging"
-
-      # SAML Configuration
-      - name: SAML_METADATA_URL
-        value: "https://sso.linuxfoundation.org/samlp/metadata/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ"
-      - name: SAML_LOGOUT_URL
-        value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
 
       # Kubernetes Cloud Configuration
       - name: JCASC_KUBERNETES_URL

@@ -1,47 +1,12 @@
 # jcasc/02-security.yaml
-# CSRF Protection: Prevents cross-site request forgery attacks
-# NOTE: If automated scripts/API calls start failing with 403 errors,
-# they may need to be updated to include CSRF tokens (crumbs)
 ---
 jenkins:
-  # Enable CSRF protection
-  crumbIssuer:
-    standard:
-      excludeClientIPFromCrumb: false
-  # Disable "Remember me" functionality for better security
-  # Users will need to re-authenticate after session expires
-  disableRememberMe: true
-  # SAML SSO Authentication via Linux Foundation SSO
-  # Emergency Access: Use 02-security-emergency.yaml if LF SSO is down
   securityRealm:
-    saml:
-      binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-      displayNameAttributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-      emailAttributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-      groupsAttributeName: "http://schemas.xmlsoap.org/claims/Group"
-      idpMetadataConfiguration:
-        period: 60
-        url: "${SAML_METADATA_URL}"
-      logoutUrl: "${SAML_LOGOUT_URL}"
-      maximumAuthenticationLifetime: 86400
-      usernameCaseConversion: "none"
-      usernameAttributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
   authorizationStrategy:
-    projectMatrix:
-      permissions:
-        # SAML Group-based Admin Access (Linux Foundation Staff)
-        # Security Review: Replaced hardcoded individual usernames with SAML groups
-        # for better maintainability and security
-        # 'staff': Members of the Linux Foundation staff who require full administrative access to Jenkins
-        - "Overall/Administer:staff"
-        # 'lf-releng': Members of the Linux Foundation Release Engineering team responsible for CI/CD infrastructure management
-        - "Overall/Administer:lf-releng"
-        # Emergency fallback admin account (local authentication)
-        - "Overall/Administer:lf-jenkins"
-        # Standard authenticated users - limited permissions
-        - "Overall/Read:authenticated"
-        - "Job/Build:authenticated"
-        - "Job/Cancel:authenticated"
-        - "Job/Read:authenticated"
-        - "Job/Workspace:authenticated"
-        - "View/Read:authenticated"
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
