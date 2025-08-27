@@ -35,9 +35,6 @@ jenkins:
         value: "https://jenkins-stag.opensearch.cluster.linuxfound.info"
       - name: JCASC_LOCATION_ADMINADDRESS
         value: "releng+opensearch-jenkins@linuxfoundation.org"
-      # Emergency Admin Email (used in 02-security-emergency.yaml)
-      - name: JCASC_EMERGENCY_ADMIN_EMAIL
-        value: "releng+opensearch-jenkins@linuxfoundation.org"
       - name: JCASC_MASTER_LABELS
         value: "staging-controller"
       - name: JCASC_RESOURCE_ROOT_URL

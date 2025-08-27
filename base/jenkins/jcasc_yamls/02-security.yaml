@@ -29,15 +29,10 @@ jenkins:
   authorizationStrategy:
     projectMatrix:
       permissions:
-        # SAML Group-based Admin Access (Linux Foundation Staff)
-        # Security Review: Replaced hardcoded individual usernames with SAML groups
-        # for better maintainability and security
-        # 'staff': Members of the Linux Foundation staff who require full administrative access to Jenkins
-        - "Overall/Administer:staff"
-        # 'lf-releng': Members of the Linux Foundation Release Engineering team responsible for CI/CD infrastructure management
-        - "Overall/Administer:lf-releng"
-        # Emergency fallback admin account (local authentication)
+        # Admin users - full control (known LF staff)
         - "Overall/Administer:lf-jenkins"
+        - "Overall/Administer:valderrv"
+        - "Overall/Administer:rdetjens"
         # Standard authenticated users - limited permissions
         - "Overall/Read:authenticated"
         - "Job/Build:authenticated"

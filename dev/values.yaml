@@ -35,8 +35,6 @@ jenkinsEnvVars:
   JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Development Environment)"
   JCASC_LOCATION_URL: ""
   JCASC_LOCATION_ADMINADDRESS: "dev-admin@example.com"
-  # Emergency Admin Email (used in 02-security-emergency.yaml)
-  JCASC_EMERGENCY_ADMIN_EMAIL: "dev-admin@example.com"
   JCASC_MASTER_LABELS: "dev-master local"
   JCASC_RESOURCE_ROOT_URL: ""
   JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
