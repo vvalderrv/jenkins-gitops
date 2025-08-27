@@ -19,13 +19,6 @@ jenkins:
 
     # Environment variables for Jenkins container (JCasC configuration)
     containerEnv:
-      # Security Configuration
-      - name: JCASC_JENKINSSECURITY_ADMINPASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: jenkins-staging
-            key: jenkins-admin-password
-      # System Configuration
       - name: JCASC_SYSTEM_MESSAGE
         value: "Welcome to Jenkins (Staging Environment)"
       - name: JCASC_LOCATION_URL
