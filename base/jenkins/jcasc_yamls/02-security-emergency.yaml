@@ -3,9 +3,14 @@
 # To activate: rename 02-security.yaml to 02-security-saml.yaml.bak
 #             rename this file to 02-security.yaml
 #             restart Jenkins pod: kubectl delete pod jenkins-staging-0 -n jenkins-staging
-# NOTE: CSRF and disableRememberMe configs are in 02-security.yaml to avoid conflicts
 ---
 jenkins:
+  # Enable CSRF protection
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  # Disable "Remember me" functionality for better security
+  disableRememberMe: true
   # Emergency local authentication - lf-jenkins account with static password
   securityRealm:
     local:
