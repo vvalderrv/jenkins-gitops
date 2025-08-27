@@ -96,12 +96,6 @@ jenkins:
       - name: JCASC_JENKINSGLOBALENVVARS_SILO
         value: "staging"
 
-      # SAML Configuration
-      - name: SAML_METADATA_URL
-        value: "https://sso.linuxfoundation.org/samlp/metadata/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ"
-      - name: SAML_LOGOUT_URL
-        value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
-
       # Kubernetes Cloud Configuration
       - name: JCASC_KUBERNETES_URL
         value: "https://kubernetes.default.svc.cluster.local"
