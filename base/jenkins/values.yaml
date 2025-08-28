@@ -62,18 +62,6 @@ jenkins:
                 - key: "SILO"
                   value: '${JCASC_JENKINSGLOBALENVVARS_SILO}'
 
-        02-security: |
-          jenkins:
-            securityRealm:
-              local:
-                allowsSignup: false
-                users:
-                  - id: "admin"
-                    password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
-            authorizationStrategy:
-              loggedInUsersCanDoAnything:
-                allowAnonymousRead: false
-
         03-tools: |
           tool:
             jdk:
