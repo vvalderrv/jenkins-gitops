@@ -14,6 +14,9 @@ serviceAccount:
 # Pass all configuration to Jenkins subchart
 jenkins:
   controller:
+    # Admin users managed via JCasC security configuration
+    # See: base/jenkins/jcasc_yamls/02-security.yaml
+
     image:
       registry: "ghcr.io"
       repository: "lfit/jenkins"
@@ -68,8 +71,8 @@ jenkins:
               local:
                 allowsSignup: false
                 users:
-                  - id: "admin"
-                    password: '${JCASC_JENKINSSECURITY_ADMINPASSWORD}'
+                  - id: "lf-jenkins"
+                    password: '${JCASC_LFJENKINS_ADMINPASSWORD}'
             authorizationStrategy:
               loggedInUsersCanDoAnything:
                 allowAnonymousRead: false
