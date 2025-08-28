@@ -8,6 +8,7 @@ spec:
   sourceRepos:
   - https://github.com/lfit/jenkins-gitops
   - https://github.com/lfit/releng-global-jjb
+  - https://charts.external-secrets.io
   destinations:
   - namespace: argocd
     server: https://kubernetes.default.svc
@@ -16,6 +17,8 @@ spec:
   - namespace: jenkins-staging
     server: '*'
   - namespace: jenkins-prod
+    server: '*'
+  - namespace: external-secrets-system
     server: '*'
   clusterResourceWhitelist:
   - group: ''
