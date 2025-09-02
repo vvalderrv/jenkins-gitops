@@ -10,6 +10,9 @@ COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 # Switch to root for install
 USER root
 
+# Echo build info
+RUN echo "Building custom Jenkins image for OpenSearch"
+
 # Install system packages and dependencies
 RUN apt-get update && apt-get install -y \
     curl \
