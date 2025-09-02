@@ -7,7 +7,7 @@ jenkins:
     image:
       registry: "ghcr.io"
       repository: "lfit/jenkins"
-      tag: "main-6c30cda"
+      tag: "main-990a6cc"
       pullPolicy: "IfNotPresent"
 
     # Override default plugins with empty list - use only image plugins
