@@ -7,8 +7,6 @@ jenkins:
       users:
         - id: "admin"
           password: '${JCASC_ADMIN_PASSWORD}'
-        - id: "lf-jenkins"
-          password: '${JCASC_LFJENKINS_ADMINPASSWORD}'
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false

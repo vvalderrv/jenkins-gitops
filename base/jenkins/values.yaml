@@ -71,8 +71,8 @@ jenkins:
               local:
                 allowsSignup: false
                 users:
-                  - id: "lf-jenkins"
-                    password: '${JCASC_LFJENKINS_ADMINPASSWORD}'
+                  - id: "admin"
+                    password: '${JCASC_ADMIN_PASSWORD}'
             authorizationStrategy:
               loggedInUsersCanDoAnything:
                 allowAnonymousRead: false

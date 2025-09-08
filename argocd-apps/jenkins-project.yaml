@@ -8,7 +8,6 @@ spec:
   sourceRepos:
   - https://github.com/lfit/jenkins-gitops
   - https://github.com/lfit/releng-global-jjb
-  - https://charts.external-secrets.io
   destinations:
   - namespace: argocd
     server: https://kubernetes.default.svc
@@ -18,19 +17,9 @@ spec:
     server: '*'
   - namespace: jenkins-prod
     server: '*'
-  - namespace: external-secrets-system
-    server: '*'
   clusterResourceWhitelist:
   - group: ''
     kind: Namespace
-  - group: 'apiextensions.k8s.io'
-    kind: CustomResourceDefinition
-  - group: 'rbac.authorization.k8s.io'
-    kind: ClusterRole
-  - group: 'rbac.authorization.k8s.io'
-    kind: ClusterRoleBinding
-  - group: 'admissionregistration.k8s.io'
-    kind: ValidatingWebhookConfiguration
   namespaceResourceWhitelist:
   - group: '*'
     kind: '*'

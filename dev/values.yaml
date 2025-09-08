@@ -71,4 +71,4 @@ jenkinsEnvVars:
   JCASC_JENKINSGLOBALENVVARS_SILO: "development"
 
   # WARNING: Dev-only. Set this in your local env or via a Secret.
-  JCASC_JENKINSSECURITY_ADMINPASSWORD: ""
+  JCASC_ADMIN_PASSWORD: ""
