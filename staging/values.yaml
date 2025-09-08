@@ -90,11 +90,6 @@ jenkins:
       - name: JCASC_ADMIN_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: jenkins-admin
-            key: admin-password
-      - name: JCASC_LFJENKINS_ADMINPASSWORD
-        valueFrom:
-          secretKeyRef:
             name: jenkins-lf-admin
             key: admin-password
 
