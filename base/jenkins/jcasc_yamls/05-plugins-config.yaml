@@ -1,4 +1,26 @@
-# This file is for plugin-specific configurations.
+---
+# Plugin Configuration Settings
+#
+# Plugin-specific configurations for GitHub integration and pull
+# request automation.
+#
+# These settings control how Jenkins interacts with GitHub repositories.
+#
+# GITHUB PLUGIN CONFIGURATION:
+# - apiRateLimitChecker: GitHub API rate limiting strategy
+# - credentialsId: Reference to GitHub API token credential
+# - hookUrl: Webhook URL for GitHub to notify Jenkins
+#
+# GHPRB TRIGGER CONFIGURATION:
+# - cron: Schedule for checking pull request status
+# - serverAPIUrl: GitHub API endpoint for repository operations
+# - adminlist: Users with admin privileges for PR commands
+# - manageWebhooks: Whether Jenkins manages GitHub webhooks
+# - okToTestPhrase: Comment phrase to trigger builds
+# - retestPhrase: Comment phrase to restart builds
+# - skipBuildPhrase: Comment phrase to skip builds
+#
+# Currently uses placeholder values - update with actual credentials and URLs.
 #
 unclassified:
   gitHubConfiguration:
@@ -7,15 +29,15 @@ unclassified:
   gitHubPluginConfig:
     configs:
       - name: "opensearch-project"
-        credentialsId: "github-api-token-placeholder"
-    hookUrl: "http://jenkins.placeholder.example.com/github-webhook/"
+        credentialsId: "${GITHUB_CREDENTIALS_ID}"
+    hookUrl: "${JENKINS_URL}/github-webhook/"
 
   ghprbTrigger:
     cron: "H/5 * * * *"
     githubAuth:
       - id: "opensearch-project-ghprb-auth"
-        serverAPIUrl: "https://api.github.com"
-        credentialsId: "github-api-token-placeholder"
+        serverAPIUrl: "${GITHUB_API_URL}"
+        credentialsId: "${GITHUB_CREDENTIALS_ID}"
         description: "GitHub auth for opensearch-project PR builder"
     adminlist: ""
     manageWebhooks: false

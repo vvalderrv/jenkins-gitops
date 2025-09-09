@@ -1,10 +1,21 @@
+---
 # Name: values.yaml
-# Purpose: Default Helm values for the Jenkins wrapper chart
-# Description: Sets PVC, service account, Jenkins image, and JCasC configuration
+# Purpose: Base Helm values for Jenkins wrapper chart configuration
+# Description: Establishes default settings for persistence, service accounts,
+# Jenkins controller image, and JCasC integration. Environment-specific
+# overrides are handled in staging/production values.yaml files.
+#
+# persistence: EBS storage configuration for Jenkins data persistence
+# serviceAccount: Kubernetes service account for Jenkins controller
+# jenkins.controller.image: Container image configuration (lfit/jenkins)
+# jenkins.controller.JCasC: Configuration as Code file loading via ConfigMap
+# jenkins.controller.resources: CPU and memory resource allocation
+# jenkins.controller.javaOpts: JVM optimization for containerized deployment
 
 persistence:
   enabled: true
-  size: 8Gi
+  # Size configured per environment: staging (4Gi), production (16Gi)
+  # Environment-specific storage in: staging/values.yaml and production/values.yaml
   storageClass: "auto-ebs-sc"
 
 serviceAccount:
@@ -12,110 +23,42 @@ serviceAccount:
   name: ""
 
 # Pass all configuration to Jenkins subchart
+# Subchart dependency defined in: base/jenkins/Chart.yaml
 jenkins:
   controller:
-    # Admin users managed via JCasC security configuration
-    # See: base/jenkins/jcasc_yamls/02-security.yaml
+    # Security and authorization configuration managed via JCasC files
+    # See: base/jenkins/jcasc_yamls/02-security.yaml (SAML SSO + project matrix authorization)
+    # See: base/jenkins/jcasc_yamls/02-security-emergency.yaml (emergency local auth fallback)
+    # See: base/jenkins/jcasc_yamls/06-credentials.yaml (1Password integration for GitHub tokens)
 
+    # Container image configuration for Jenkins controller
+    # Base layer provides defaults, environment layers control specific versions
+    # Image versioning and pull policy controlled in: staging/values.yaml and production/values.yaml
     image:
       registry: "ghcr.io"
       repository: "lfit/jenkins"
-      tag: "latest"
-      pullPolicy: "IfNotPresent"
+      # tag: removed - environment layers specify exact versions
+      # pullPolicy: moved to environment layers for environment-specific optimization
 
-    # Use native chart fields instead of JCasC to avoid conflicts
+    # Use native Jenkins Helm chart fields instead of JCasC to avoid conflicts
+    # Chart configuration defined in: base/jenkins/Chart.yaml dependencies
     numExecutors: 0
     executorMode: EXCLUSIVE
 
+    # JCasC configuration loaded from external files via configMapRef
+    # See: base/jenkins/jcasc_yamls/ directory for all configuration files
+    # See: base/jenkins/templates/jcasc-configmap.yaml for file loading
     JCasC:
-      defaultConfig: false
-      configScripts:
+      defaultConfig: true
+      # All configuration loaded from external files - no inline config
 
-        01-global-env-vars: |
-          jenkins:
-            globalNodeProperties:
-            - envVars:
-                env:
-                - key: "GLOBAL_LOG_LEVEL"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_LOGLEVEL}'
-                - key: "ARTIFACTORY_URL"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL}'
-                - key: "COMPANY_NAME"
-                  value: "OpenSearch Project"
-                - key: "DOCKER_REGISTRY"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY}'
-                - key: "GIT_BASE"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_GITBASEURL}/$PROJECT'
-                - key: "GIT_URL"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_GITURL}'
-                - key: "PACKAGECLOUDPROXY"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY}'
-                - key: "PCIO_CO"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_PCIOCO}'
-                - key: "RELEASE_EMAIL"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL}'
-                - key: "RELEASE_USERNAME"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME}'
-                - key: "S3_BUCKET"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_S3BUCKET}'
-                - key: "CDN_URL"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_CDNURL}'
-                - key: "SIGUL_KEY"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_SIGULKEY}'
-                - key: "SILO"
-                  value: '${JCASC_JENKINSGLOBALENVVARS_SILO}'
+    # GitHub integration configuration (shared across all environments)
+    # GitHub service account token and API settings
+    containerEnv:
+      - name: JCASC_GITHUB_API_URL
+        value: "https://api.github.com"
+      - name: JCASC_GITHUB_CREDENTIALS_ID
+        value: "github-token"
 
-        02-security: |
-          jenkins:
-            securityRealm:
-              local:
-                allowsSignup: false
-                users:
-                  - id: "admin"
-                    password: '${JCASC_ADMIN_PASSWORD}'
-            authorizationStrategy:
-              loggedInUsersCanDoAnything:
-                allowAnonymousRead: false
-
-        03-tools: |
-          tool:
-            jdk:
-              installations:
-                - name: "jdk-17"
-                  home: "/opt/java/openjdk"
-            git:
-              installations:
-                - name: "Default"
-                  home: "git"
-
-        04-global-libraries: |
-          # Jenkins global pipeline library configurations placeholder
-
-        05-plugins-config: |
-          unclassified:
-            gitHubConfiguration:
-              apiRateLimitChecker: ThrottleForNormalize
-            gitHubPluginConfig:
-              configs:
-                - name: "opensearch-project"
-                  credentialsId: "github-api-token-placeholder"
-              hookUrl: "http://jenkins.placeholder.example.com/github-webhook/"
-            ghprbTrigger:
-              cron: "H/5 * * * *"
-              githubAuth:
-                - id: "opensearch-project-ghprb-auth"
-                  serverAPIUrl: "https://api.github.com"
-                  credentialsId: "github-api-token-placeholder"
-                  description: "GitHub auth for opensearch-project PR builder"
-              adminlist: ""
-              manageWebhooks: false
-              okToTestPhrase: ".*ok to test.*"
-              retestPhrase: ".*test this please.*"
-              skipBuildPhrase: ".*\\[skip ci\\].*"
-
-        06-credentials: |
-          # Jenkins credential configurations placeholder
-
-        07-cloud-agents: |
-          # Cloud agents configuration moved to separate jcasc_yamls file
-          # See: base/jenkins/jcasc_yamls/07-cloud-agents.yaml
+    # Resource configuration and JVM options moved to environment layers
+    # Environment-specific settings in: staging/values.yaml and production/values.yaml
