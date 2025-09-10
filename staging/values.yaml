@@ -146,4 +146,4 @@ jenkins:
   persistence:
     enabled: true
     storageClass: "auto-ebs-sc"
-    size: "4Gi"
+    size: "20Gi"
