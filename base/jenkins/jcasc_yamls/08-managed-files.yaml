@@ -1,0 +1,16 @@
+---
+# jcasc/08-managed-files.yaml
+unclassified:
+  configFileProvider:
+    configs:
+      # Example managed file configurations
+      # Communities can add their own managed files here
+      # - providerId: "org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig"
+      #   id: "maven-settings"
+      #   name: "Maven Settings"
+      #   comment: "Global Maven settings"
+      #   content: |
+      #     <?xml version="1.0" encoding="UTF-8"?>
+      #     <settings>
+      #       <!-- Maven configuration -->
+      #     </settings>

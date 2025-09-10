@@ -1,28 +1,35 @@
+---
+# Cloud Agent Configuration
+#
+# Kubernetes cloud configuration for dynamic Jenkins build agents.
+# Agents are created as pods in the Kubernetes cluster on demand.
+#
+# JCASC_KUBERNETES_URL: Kubernetes API server URL for cluster access
+# JCASC_KUBERNETES_NAMESPACE: Namespace for creating agent pods
+# JCASC_KUBERNETES_JENKINS_URL: Jenkins URL accessible from agent pods
+# JCASC_KUBERNETES_JENKINS_TUNNEL: Jenkins agent port for JNLP connection
+#
+# Agent pods are automatically created for builds and cleaned up after
+# build completion.
+#
 jenkins:
   clouds:
     - kubernetes:
         name: "kubernetes"
         serverUrl: "${JCASC_KUBERNETES_URL:-https://kubernetes.default.svc.cluster.local}"
         namespace: "${JCASC_KUBERNETES_NAMESPACE:-default}"
-        # credentialsId is intentionally empty to use the default service account
-        # of the Jenkins pod for Kubernetes API authentication
         credentialsId: ""
         jenkinsUrl: "${JCASC_KUBERNETES_JENKINS_URL:-http://jenkins:8080}"
         jenkinsTunnel: "${JCASC_KUBERNETES_JENKINS_TUNNEL:-jenkins:50000}"
-        # Fixed: containerCap must be integer, not string (was containerCapStr)
         containerCap: 10
         maxRequestsPerHostStr: "32"
-        # Match live configuration: 180 seconds (3 minutes)
         retentionTimeout: 180
         connectTimeout: 10
         readTimeout: 20
-        # Wait time for pod readiness (10 minutes)
         waitForPodSec: 600
         usageRestricted: false
-        # Enable garbage collection for orphan pod cleanup (timeout in seconds)
         garbageCollection:
           timeout: 300
-        # Enhanced pod labels for better resource management
         podLabels:
           - key: "jenkins"
             value: "slave"

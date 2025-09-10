@@ -1,14 +1,143 @@
+---
 # Name: production/values.yaml
-# Purpose: Provide Helm values customized for the Production Jenkins env
-# Description: Overrides Jenkins image, JVM opts, and JCasC env variables
+# Purpose: Production environment Helm values for Jenkins wrapper chart configuration
+# Description: Environment-specific overrides for production deployment including
+# image versioning, resource allocation, JVM optimization, and JCasC variables.
+# Inherits base configuration from base/jenkins/values.yaml.
+#
+# persistence.size: Production-appropriate storage allocation (16Gi)
+# jenkins.controller.image: Production image tag and pull policy for reliability
+# jenkins.controller.resources: Resource limits appropriate for production workloads
+# jenkins.controller.javaOpts: JVM tuning for production memory allocation
+# jenkins.controller.containerEnv: Environment variables for JCasC configuration
+# jenkins.controller.ingress: External access configuration for production environment
 
+# Production-specific persistence configuration
+# Storage size configured in jenkins.persistence section below
+
+# Jenkins subchart configuration overrides
+# Inherits base configuration from: base/jenkins/values.yaml
 jenkins:
   controller:
+    # Container image configuration for production environment
+    # Uses specific commit SHA for production stability
+    # Pull policy set to Always for latest security updates
     image:
-      # Using the official public Jenkins LTS image as a placeholder.
-      repository: "jenkins/jenkins"
-      tag: "lts-jdk17"
+      registry: "ghcr.io"
+      repository: "lfit/jenkins"
+      tag: "main-990a6cc"
       pullPolicy: "Always"
+
+    # Plugin management - use only plugins baked into image
+    # Prevents plugin version conflicts in production environment
+    installPlugins: false
+
+    # Resource allocation for production environment
+    # Higher resource limits appropriate for production workloads
+    resources:
+      requests:
+        cpu: "2000m"
+        memory: "4Gi"
+      limits:
+        cpu: "4000m"
+        memory: "8Gi"
+
+    # JVM optimization for production environment
+    # Memory settings aligned with resource limits above
+    javaOpts: >-
+      -XX:+UseG1GC
+      -XX:+UseStringDeduplication
+      -XX:+ParallelRefProcEnabled
+      -XX:+DisableExplicitGC
+      -XX:+UnlockExperimentalVMOptions
+      -XX:G1NewSizePercent=20
+      -XX:+UnlockDiagnosticVMOptions
+      -XX:G1MixedGCCountTarget=16
+      -XX:G1MixedGCLiveThresholdPercent=90
+      -XX:G1RSetUpdatingPauseTimePercent=5
+      -XX:G1HeapRegionSize=32M
+      -Xmx6g
+      -XX:MaxMetaspaceSize=512m
+
+    # Environment variables for Jenkins container (JCasC configuration)
+    # Variables consumed by: base/jenkins/jcasc_yamls/ configuration files
+    # Environment-specific values for production deployment context
+    containerEnv:
+      # System Configuration (01-global-env-vars.yaml)
+      - name: JCASC_SILO
+        value: "production"
+      - name: JCASC_JENKINS_URL
+        value: "https://jenkins.opensearch.cluster.linuxfound.info/"
+      - name: JENKINS_URL
+        value: "https://jenkins.opensearch.cluster.linuxfound.info/"
+      - name: JCASC_LOCATION_URL
+        value: ""
+      - name: JCASC_LOCATION_ADMINADDRESS
+        value: ""
+      - name: JCASC_SYSTEM_MESSAGE
+        value: "Welcome to Jenkins (Production Environment)"
+      - name: JCASC_MASTER_LABELS
+        value: "prod-controller"
+      - name: JCASC_RESOURCE_ROOT_URL
+        value: ""
+
+      # Build and Performance Configuration
+      - name: JCASC_BUILD_TIMEOUT
+        value: "7200"
+      - name: JCASC_MAVEN_OPTS
+        value: "-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+      - name: JCASC_NODE_OPTIONS
+        value: "--max-old-space-size=8192"
+      - name: JCASC_SCM_POLLING_THREADCOUNT
+        value: "10"
+
+      # Integration Configuration (placeholders for future configuration)
+      - name: JCASC_LOG_LEVEL
+        value: "ERROR"
+      - name: JCASC_ARTIFACTORY_URL
+        value: ""
+      - name: JCASC_DOCKER_REGISTRY
+        value: ""
+      - name: JCASC_S3_BUCKET
+        value: ""
+      - name: JCASC_CDN_URL
+        value: ""
+      - name: JCASC_ARTIFACTS_RETENTION_DAYS
+        value: ""
+      - name: JCASC_ECR_REGISTRY_URL
+        value: ""
+
+      # Security Configuration (02-security.yaml integration)
+      - name: JCASC_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: jenkins-lf-admin
+            key: admin-password
+
+      # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
+      - name: JCASC_KUBERNETES_URL
+        value: "https://kubernetes.default.svc.cluster.local"
+      - name: JCASC_KUBERNETES_NAMESPACE
+        value: "jenkins-production"
+      - name: JCASC_KUBERNETES_JENKINS_URL
+        value: "http://jenkins-production.jenkins-production.svc.cluster.local:8080"
+      - name: JCASC_KUBERNETES_JENKINS_TUNNEL
+        value: "jenkins-production-agent.jenkins-production.svc.cluster.local:50000"
+
+    # External access configuration for production environment
+    # Provides public access for production workflows
+    ingress:
+      enabled: true
+      apiVersion: networking.k8s.io/v1
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+      hostName: jenkins.opensearch.cluster.linuxfound.info
+      path: /
+      tls:
+        - secretName: jenkins-production-tls
+          hosts:
+            - jenkins.opensearch.cluster.linuxfound.info
 
   # Defining resource requests and limits for the production environment.
   resources:
@@ -19,46 +148,9 @@ jenkins:
       cpu: "4000m"
       memory: "8Gi"
 
-  jenkinsJavaOpts: "-Xms4g -Xmx6g"
+  jenkinsJavaOpts: "-Xms2g -Xmx6g"
 
-  jenkinsEnvVars:
-    JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Production Environment)"
-    JCASC_LOCATION_URL: ""
-    JCASC_LOCATION_ADMINADDRESS: "releng+opensearch-jenkins@linuxfoundation.org"
-    JCASC_MASTER_LABELS: "prod-controller"
-    JCASC_RESOURCE_ROOT_URL: ""
-    JCASC_DISABLE_DEFERRED_WIPEOUT: "false"
-    JCASC_SCM_POLLING_THREADCOUNT: "10"
-
-    JCASC_PROXY_HOST: ""
-    JCASC_PROXY_PORT: ""
-    JCASC_PROXY_USERNAME: ""
-    JCASC_PROXY_NOPROXY: ""
-
-    JCASC_FINGERPRINT_STORAGE: ""
-    JCASC_FINGERPRINT_CLEANUP_PERIOD: ""
-
-    JCASC_MAILER_SMTP_HOST: ""
-    JCASC_MAILER_SMTP_PORT: ""
-    JCASC_MAILER_USE_SSL: "false"
-    JCASC_MAILER_USE_TLS: "false"
-    JCASC_MAILER_SMTP_USERNAME: ""
-    JCASC_MAILER_DEFAULT_SUFFIX: ""
-    JCASC_MAILER_CHARSET: "UTF-8"
-
-    JCASC_JENKINSGLOBALENVVARS_LOGLEVEL: ""
-    JCASC_JENKINSGLOBALENVVARS_ARTIFACTORYURL: ""
-    JCASC_JENKINSGLOBALENVVARS_DOCKERREGISTRY: ""
-    JCASC_JENKINSGLOBALENVVARS_GITBASEURL: ""
-    JCASC_JENKINSGLOBALENVVARS_GITURL: ""
-    JCASC_JENKINSGLOBALENVVARS_PACKAGECLOUDPROXY: ""
-    JCASC_JENKINSGLOBALENVVARS_PCIOCO: ""
-    JCASC_JENKINSGLOBALENVVARS_RELEASEEMAIL: ""
-    JCASC_JENKINSGLOBALENVVARS_RELEASEUSERNAME: ""
-    JCASC_JENKINSGLOBALENVVARS_S3BUCKET: ""
-    JCASC_JENKINSGLOBALENVVARS_CDNURL: ""
-    JCASC_JENKINSGLOBALENVVARS_SIGULKEY: ""
-    JCASC_JENKINSGLOBALENVVARS_SILO: "production"
-
-    # Admin password - to be managed by Tofu/Terraform
-    JCASC_ADMIN_PASSWORD: ""
+  persistence:
+    enabled: true
+    storageClass: "auto-ebs-sc"
+    size: "16Gi"

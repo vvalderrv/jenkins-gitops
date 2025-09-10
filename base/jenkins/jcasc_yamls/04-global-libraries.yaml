@@ -1,2 +1,19 @@
-# jcasc/04-global-libraries.yaml
-# Placeholder for Jenkins global pipeline library configurations.
+---
+# Global Pipeline Libraries Configuration
+#
+# Defines shared pipeline libraries available to all Jenkins jobs.
+# Libraries provide reusable pipeline code and standardized build functions.
+#
+# TYPICAL LIBRARY CONFIGURATION:
+# - name: Library identifier used in Jenkinsfile @Library declarations
+# - retriever: Source location (Git repository, branch, credentials)
+# - defaultVersion: Default branch/tag to use if not specified
+# - allowDefaultVersionOverride: Allow jobs to specify different versions
+# - implicit: Automatically load library without @Library declaration
+#
+# Libraries enable standardized CI/CD patterns across all projects.
+# Configure libraries here when shared pipeline code is available.
+#
+# WHY THIS FILE IS MINIMAL:
+# No shared libraries are currently configured.
+# Add configurations here when projects provide reusable pipeline code.

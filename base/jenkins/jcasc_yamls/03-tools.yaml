@@ -1,4 +1,15 @@
-# Java Development Kit (JDK)
+---
+# Tool Installations Configuration
+#
+# Defines development tools available to Jenkins jobs across all environments.
+# Tools are installed globally and available to all build agents.
+#
+# JDK-17: Java Development Kit for building Java applications
+# GIT: Version control system for source code management
+#
+# These tools use fixed paths and rely on container image installations.
+# Override paths if tools are installed in different locations.
+#
 tool:
   jdk:
     installations:
