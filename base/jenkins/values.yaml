@@ -49,7 +49,7 @@ jenkins:
     # See: base/jenkins/jcasc_yamls/ directory for all configuration files
     # See: base/jenkins/templates/jcasc-configmap.yaml for file loading
     JCasC:
-      defaultConfig: true
+      defaultConfig: false
       # All configuration loaded from external files - no inline config
 
     # GitHub integration configuration (shared across all environments)
