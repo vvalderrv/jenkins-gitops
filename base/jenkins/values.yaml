@@ -2,13 +2,14 @@
 # Name: values.yaml
 # Purpose: Base Helm values for Jenkins wrapper chart configuration
 # Description: Establishes default settings for persistence, service accounts,
-# Jenkins controller image, and JCasC integration. Environment-specific
+# Jenkins controller image, and shared environment variables. JCasC integration
+# moved to environment-specific configScripts. Environment-specific
 # overrides are handled in staging/production values.yaml files.
 #
 # persistence: EBS storage configuration for Jenkins data persistence
 # serviceAccount: Kubernetes service account for Jenkins controller
 # jenkins.controller.image: Container image configuration (lfit/jenkins)
-# jenkins.controller.JCasC: Configuration as Code file loading via ConfigMap
+# jenkins.controller.containerEnv: Shared environment variables
 # jenkins.controller.resources: CPU and memory resource allocation
 # jenkins.controller.javaOpts: JVM optimization for containerized deployment
 
@@ -26,10 +27,8 @@ serviceAccount:
 # Subchart dependency defined in: base/jenkins/Chart.yaml
 jenkins:
   controller:
-    # Security and authorization configuration managed via JCasC files
-    # See: base/jenkins/jcasc_yamls/02-security.yaml (SAML SSO + project matrix authorization)
-    # See: base/jenkins/jcasc_yamls/02-security-emergency.yaml (emergency local auth fallback)
-    # See: base/jenkins/jcasc_yamls/06-credentials.yaml (1Password integration for GitHub tokens)
+    # JCasC configuration now managed via configScripts in environment values.yaml files
+    # Environment-specific JCasC settings in: staging/values.yaml and production/values.yaml
 
     # Container image configuration for Jenkins controller
     # Base layer provides defaults, environment layers control specific versions
@@ -45,12 +44,8 @@ jenkins:
     numExecutors: 0
     executorMode: EXCLUSIVE
 
-    # JCasC configuration loaded from external files via configMapRef
-    # See: base/jenkins/jcasc_yamls/ directory for all configuration files
-    # See: base/jenkins/templates/jcasc-configmap.yaml for file loading
-    JCasC:
-      defaultConfig: true
-      # All configuration loaded from external files - no inline config
+    # JCasC configuration now managed via configScripts in environment values.yaml files
+    # Environment-specific JCasC settings in: staging/values.yaml and production/values.yaml
 
     # GitHub integration configuration (shared across all environments)
     # GitHub service account token and API settings
