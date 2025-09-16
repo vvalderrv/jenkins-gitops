@@ -30,6 +30,11 @@ jenkins:
     # JCasC configuration now managed via configScripts in environment values.yaml files
     # Environment-specific JCasC settings in: staging/values.yaml and production/values.yaml
 
+    # Jenkins Configuration as Code - disable chart defaults globally
+    # All environments use explicit configScripts for GitOps compliance
+    JCasC:
+      defaultConfig: false
+
     # Container image configuration for Jenkins controller
     # Base layer provides defaults, environment layers control specific versions
     # Image versioning and pull policy controlled in: staging/values.yaml and production/values.yaml
