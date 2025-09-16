@@ -32,6 +32,13 @@ jenkins:
     # Prevents plugin version conflicts in staging environment
     installPlugins: false
 
+    # Kubernetes health probe configuration for staging environment
+    # Increase startup probe timeout to accommodate Jenkins initialization with plugins
+    # Default: 12 failures × 10s = 120s, Updated: 18 failures × 10s = 180s (3 minutes)
+    probes:
+      startupProbe:
+        failureThreshold: 18
+
     # Jenkins Configuration as Code
     JCasC:
       defaultConfig: false
