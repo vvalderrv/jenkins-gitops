@@ -153,7 +153,7 @@ jenkins:
                   - string:
                       id: "${GITHUB_CREDENTIALS_ID}"
                       description: "GitHub opensearch-jenkins service account token"
-                      secret: "${GITHUB_TOKEN:-dummy-token}"
+                      secret: "op://OpenSearch Project/opensearch-jenkins-github-token/password"
 
         unclassified-config: |
           unclassified:
@@ -275,6 +275,13 @@ jenkins:
           secretKeyRef:
             name: jenkins-lf-admin
             key: admin-password
+
+      # 1Password Integration
+      - name: ONEPASSWORD_SA_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: onepassword-sa-token
+            key: token
 
       # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
       - name: JCASC_KUBERNETES_URL
