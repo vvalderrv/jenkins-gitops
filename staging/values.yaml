@@ -143,19 +143,19 @@ jenkins:
             system:
               domainCredentials:
                 - credentials:
-                    # 1Password Service Account Integration
-                    - onePasswordCredentials:
-                        id: "onepassword-integration"
-                        description: "1Password service account for build secret access"
-                        serviceAccountToken:
-                          secretName: "onepassword-sa-token"
-                          key: "token"
+                  # 1Password Service Account Integration
+                  - onePasswordCredentials:
+                      id: "onepassword-integration"
+                      description: "1Password service account for build secret access"
+                      serviceAccountToken:
+                        secretName: "onepassword-sa-token"
+                        key: "token"
 
-                    # GitHub Service Account Token for CI/CD Operations
-                    - string:
-                        id: "${GITHUB_CREDENTIALS_ID}"
-                        description: "GitHub opensearch-jenkins service account token"
-                        secret: "op://Employee/opensearch-jenkins-github-token/password"
+                  # GitHub Service Account Token for CI/CD Operations
+                  - string:
+                      id: "${GITHUB_CREDENTIALS_ID}"
+                      description: "GitHub opensearch-jenkins service account token"
+                      secret: "op://Employee/opensearch-jenkins-github-token/password"
 
         unclassified-config: |
           unclassified:
