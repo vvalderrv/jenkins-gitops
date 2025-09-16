@@ -276,6 +276,17 @@ jenkins:
             name: jenkins-lf-admin
             key: admin-password
 
+      # 1Password Integration Configuration
+      - name: ONEPASSWORD_SA_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: onepassword-sa-token
+            key: token
+
+      # GitHub Integration Configuration
+      - name: GITHUB_TOKEN
+        value: "dummy-token"
+
       # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
       - name: JCASC_KUBERNETES_URL
         value: "https://kubernetes.default.svc.cluster.local"
