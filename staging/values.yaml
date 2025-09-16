@@ -181,7 +181,7 @@ jenkins:
               manageWebhooks: false
               okToTestPhrase: ".*ok to test.*"
               retestPhrase: ".*test this please.*"
-              skipBuildPhrase: ".*\[skip ci\].*"
+              skipBuildPhrase: ".*\\[skip ci\\].*"
 
             # Managed files configuration
             configFileProvider:
