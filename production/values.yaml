@@ -32,6 +32,11 @@ jenkins:
     # Prevents plugin version conflicts in production environment
     installPlugins: false
 
+    # Jenkins Configuration as Code
+    # Complete JCasC configuration for production environment
+    JCasC:
+      defaultConfig: false
+
     # Resource allocation for production environment
     # Higher resource limits appropriate for production workloads
     resources:

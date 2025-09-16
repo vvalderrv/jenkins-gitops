@@ -34,7 +34,7 @@ jenkins:
 
     # Jenkins Configuration as Code
     JCasC:
-      defaultConfig: true
+      defaultConfig: false
       configScripts:
         # OFFICIAL MULTIPLE ROOT KEYS PATTERN
         # Organizes configurations by root key type to eliminate merge conflicts
