@@ -288,6 +288,12 @@ jenkins:
             name: jenkins-lf-admin
             key: admin-password
 
+      # SAML Configuration
+      - name: SAML_METADATA_URL
+        value: "https://sso.linuxfoundation.org/samlp/metadata/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ"
+      - name: SAML_LOGOUT_URL
+        value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
+
       # 1Password Integration
       - name: ONEPASSWORD_SA_TOKEN
         valueFrom:
