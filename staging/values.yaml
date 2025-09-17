@@ -150,11 +150,11 @@ jenkins:
             system:
               domainCredentials:
                 - credentials:
-                  # 1Password Service Account Integration
-                  - opSecret:
-                      id: "onepassword-integration"
-                      description: "1Password service account for build secret access"
-                      serviceAccountToken: "${ONEPASSWORD_SA_TOKEN:-dummy}"
+                  # 1Password Service Account Token (standard string credential)
+                  - string:
+                      id: "onepassword-service-account"
+                      description: "1Password service account token for secret access"
+                      secret: "${ONEPASSWORD_SA_TOKEN:-}"
 
                   # GitHub Service Account Token for CI/CD Operations
                   - string:
@@ -164,6 +164,11 @@ jenkins:
 
         unclassified-config: |
           unclassified:
+            # 1Password global configuration
+            onePasswordGlobalConfig:
+              config:
+                serviceAccountCredentialId: "onepassword-service-account"
+
             # GitHub plugin configuration
             gitHubConfiguration:
               apiRateLimitChecker: ThrottleForNormalize
