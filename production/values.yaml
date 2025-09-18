@@ -38,9 +38,167 @@ jenkins:
     installPlugins: false
 
     # Jenkins Configuration as Code
-    # Complete JCasC configuration for production environment
     JCasC:
       defaultConfig: false
+      configScripts:
+        # OFFICIAL MULTIPLE ROOT KEYS PATTERN
+        # Organizes configurations by root key type to eliminate merge conflicts
+        # Based on jenkinsci/configuration-as-code-plugin official documentation
+
+        jenkins-config: |
+          jenkins:
+            # System message configuration
+            systemMessage: |
+              1Password Integration Status:
+              - Plugin: OnePassword Integration for Build Secrets
+              - Service Account: Available via onepassword-sa-token cluster secret
+              - GitHub Token: opensearch-jenkins service account configured
+
+            # Global environment variables available to all Jenkins jobs
+            globalNodeProperties:
+              - envVars:
+                  env:
+                    - key: "RELEASE_EMAIL"
+                      value: '${JCASC_RELEASE_EMAIL:-noreply@opensearch.org}'
+                    - key: "WORKSPACE_CLEANUP"
+                      value: '${JCASC_WORKSPACE_CLEANUP:-true}'
+                    - key: "DISABLE_DEFERRED_WIPEOUT"
+                      value: '${JCASC_DISABLE_DEFERRED_WIPEOUT:-false}'
+                    - key: "AWS_REGION"
+                      value: '${JCASC_AWS_REGION:-us-west-2}'
+                    - key: "GIT_BASE"
+                      value: '${JCASC_GIT_BASE:-https://github.com}'
+                    - key: "GIT_URL"
+                      value: '${JCASC_GIT_URL:-https://github.com}'
+                    - key: "GITHUB_API_URL"
+                      value: '${JCASC_GITHUB_API_URL:-https://api.github.com}'
+                    - key: "LANG"
+                      value: '${JCASC_LANG:-C.UTF-8}'
+                    - key: "CI_ENVIRONMENT"
+                      value: '${JCASC_SILO}'
+                    - key: "JENKINS_URL"
+                      value: '${JCASC_JENKINS_URL}'
+                    - key: "GITHUB_CREDENTIALS_ID"
+                      value: '${JCASC_GITHUB_CREDENTIALS_ID:-github-token}'
+                    - key: "SAML_METADATA_URL"
+                      value: '${SAML_METADATA_URL}'
+                    - key: "SAML_LOGOUT_URL"
+                      value: '${SAML_LOGOUT_URL}'
+
+            # CSRF protection configuration
+            crumbIssuer:
+              standard:
+                excludeClientIPFromCrumb: false
+
+            # Disable "Remember me" for enhanced security
+            disableRememberMe: true
+
+            # SAML SSO authentication via Linux Foundation identity provider
+            securityRealm:
+              saml:
+                binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+                displayNameAttributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+                emailAttributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+                groupsAttributeName: "http://schemas.xmlsoap.org/claims/Group"
+                idpMetadataConfiguration:
+                  period: 60
+                  url: "${SAML_METADATA_URL}"
+                logoutUrl: "${SAML_LOGOUT_URL}"
+                maximumAuthenticationLifetime: 86400
+
+            # Kubernetes cloud configuration for dynamic build agents
+            clouds:
+              - kubernetes:
+                  name: "kubernetes"
+                  serverUrl: "${JCASC_KUBERNETES_URL:-https://kubernetes.default.svc.cluster.local}"
+                  namespace: "${JCASC_KUBERNETES_NAMESPACE:-default}"
+                  credentialsId: ""
+                  jenkinsUrl: "${JCASC_KUBERNETES_JENKINS_URL:-http://jenkins:8080}"
+                  jenkinsTunnel: "${JCASC_KUBERNETES_JENKINS_TUNNEL:-jenkins:50000}"
+                  containerCap: 10
+                  maxRequestsPerHostStr: "32"
+                  retentionTimeout: 180
+                  connectTimeout: 10
+                  readTimeout: 20
+                  waitForPodSec: 600
+                  usageRestricted: false
+                  garbageCollection:
+                    timeout: 300
+                  podLabels:
+                    - key: "jenkins"
+                      value: "slave"
+                    - key: "app.kubernetes.io/managed-by"
+                      value: "jenkins"
+                    - key: "app.kubernetes.io/part-of"
+                      value: "cicd"
+                  templates:
+                    - name: "default-agent"
+                      label: "kubernetes"
+                      nodeUsageMode: "NORMAL"
+                      containers:
+                        - name: "jnlp"
+                          image: "jenkins/inbound-agent:latest"
+                          args: "^${computer.jnlpmac} ^${computer.name}"
+                          resourceRequestCpu: "200m"
+                          resourceRequestMemory: "256Mi"
+                          resourceLimitCpu: "500m"
+
+        credentials-config: |
+          credentials:
+            system:
+              domainCredentials:
+                - credentials:
+                  # 1Password Service Account Token (standard string credential)
+                  - string:
+                      id: "onepassword-service-account"
+                      description: "1Password service account token for secret access"
+                      secret: "${ONEPASSWORD_SA_TOKEN:-}"
+
+                  # GitHub Service Account Token for CI/CD Operations
+                  - string:
+                      id: "${GITHUB_CREDENTIALS_ID}"
+                      description: "GitHub opensearch-jenkins service account token"
+                      secret: "op://OpenSearch Project/opensearch-jenkins-github-token/password"
+
+        unclassified-config: |
+          unclassified:
+            # GitHub plugin configuration
+            gitHubConfiguration:
+              apiRateLimitChecker: ThrottleForNormalize
+
+            gitHubPluginConfig:
+              configs:
+                - name: "opensearch-project"
+                  credentialsId: "${GITHUB_CREDENTIALS_ID}"
+              hookUrl: "${JENKINS_URL}/github-webhook/"
+
+            # GitHub Pull Request Builder configuration
+            ghprbTrigger:
+              cron: "H/5 * * * *"
+              githubAuth:
+                - id: "opensearch-project-ghprb-auth"
+                  serverAPIUrl: "${GITHUB_API_URL}"
+                  credentialsId: "${GITHUB_CREDENTIALS_ID}"
+                  description: "GitHub auth for opensearch-project PR builder"
+              adminlist: ""
+              manageWebhooks: false
+              okToTestPhrase: ".*ok to test.*"
+              retestPhrase: ".*test this please.*"
+              skipBuildPhrase: ".*\\[skip ci\\].*"
+
+        tool-config: |
+          tool:
+            # Java Development Kit configuration
+            jdk:
+              installations:
+                - name: "jdk-17"
+                  home: "/opt/java/openjdk"
+
+            # Git version control system configuration
+            git:
+              installations:
+                - name: "Default"
+                  home: "git"
 
     # Resource allocation for production environment
     # Higher resource limits appropriate for production workloads
@@ -124,15 +282,32 @@ jenkins:
             name: jenkins-lf-admin
             key: admin-password
 
+      # SAML Configuration
+      - name: SAML_METADATA_URL
+        value: "https://sso.linuxfoundation.org/samlp/metadata/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ"
+      - name: SAML_LOGOUT_URL
+        value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
+
+      # 1Password Integration
+      - name: ONEPASSWORD_SA_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: onepassword-sa-token
+            key: token
+
+      # GitHub Credentials Configuration
+      - name: JCASC_GITHUB_CREDENTIALS_ID
+        value: "github-token"
+
       # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
       - name: JCASC_KUBERNETES_URL
         value: "https://kubernetes.default.svc.cluster.local"
       - name: JCASC_KUBERNETES_NAMESPACE
-        value: "jenkins-production"
+        value: "jenkins-prod"
       - name: JCASC_KUBERNETES_JENKINS_URL
-        value: "http://jenkins-production.jenkins-production.svc.cluster.local:8080"
+        value: "http://jenkins-prod.jenkins-prod.svc.cluster.local:8080"
       - name: JCASC_KUBERNETES_JENKINS_TUNNEL
-        value: "jenkins-production-agent.jenkins-production.svc.cluster.local:50000"
+        value: "jenkins-prod-agent.jenkins-prod.svc.cluster.local:50000"
 
     # External access configuration for production environment
     # Provides public access for production workflows
