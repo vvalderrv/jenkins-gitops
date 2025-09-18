@@ -164,11 +164,6 @@ jenkins:
 
         unclassified-config: |
           unclassified:
-            # 1Password global configuration
-            onePasswordGlobalConfig:
-              config:
-                serviceAccountCredentialId: "onepassword-service-account"
-
             # GitHub plugin configuration
             gitHubConfiguration:
               apiRateLimitChecker: ThrottleForNormalize
@@ -192,12 +187,6 @@ jenkins:
               okToTestPhrase: ".*ok to test.*"
               retestPhrase: ".*test this please.*"
               skipBuildPhrase: ".*\\[skip ci\\].*"
-
-            # Managed files configuration
-            configFileProvider:
-              configs:
-                # Example managed file configurations
-                # Communities can add their own managed files here
 
         tool-config: |
           tool:
