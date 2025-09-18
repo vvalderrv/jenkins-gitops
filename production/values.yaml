@@ -18,6 +18,11 @@
 # Jenkins subchart configuration overrides
 # Inherits base configuration from: base/jenkins/values.yaml
 jenkins:
+  # Service account configuration for AWS IAM role assumption
+  serviceAccount:
+    annotations:
+      "eks.amazonaws.com/role-arn": "arn:aws:iam::156041419073:role/jenkins-prod-irsa"
+
   controller:
     # Container image configuration for production environment
     # Uses specific commit SHA for production stability
