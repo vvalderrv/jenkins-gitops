@@ -159,7 +159,7 @@ jenkins:
                   - string:
                       id: "onepassword-service-account"
                       description: "1Password service account token for secret access"
-                      secret: "${ONEPASSWORD_SA_TOKEN:-}"
+                      secret: "${ONEPASSWORD_SA_TOKEN}"
 
                   # GitHub Service Account Token for CI/CD Operations
                   - string:
