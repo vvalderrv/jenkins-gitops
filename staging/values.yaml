@@ -159,7 +159,7 @@ jenkins:
                   - string:
                       id: "onepassword-service-account"
                       description: "1Password service account token for secret access"
-                      secret: "${ONEPASSWORD_SA_TOKEN:-}"
+                      secret: "${ONEPASSWORD_SA_TOKEN}"
 
                   # GitHub Service Account Token for CI/CD Operations
                   - string:
@@ -288,7 +288,7 @@ jenkins:
       - name: SAML_LOGOUT_URL
         value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
 
-      # 1Password Integration
+      # 1Password Service Account Token (ESO-managed)
       - name: ONEPASSWORD_SA_TOKEN
         valueFrom:
           secretKeyRef:
