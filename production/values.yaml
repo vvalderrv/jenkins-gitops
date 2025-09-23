@@ -288,6 +288,13 @@ jenkins:
       - name: SAML_LOGOUT_URL
         value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
 
+      # 1Password Service Account Token (ESO-managed)
+      - name: ONEPASSWORD_SA_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: onepassword-sa-token
+            key: token
+
       # GitHub Credentials Configuration
       - name: JCASC_GITHUB_CREDENTIALS_ID
         value: "github-token"
