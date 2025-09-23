@@ -78,6 +78,8 @@ jenkins:
                       value: '${JCASC_SILO}'
                     - key: "JENKINS_URL"
                       value: '${JCASC_JENKINS_URL}'
+                    - key: "JCASC_GITHUB_CREDENTIALS_ID"
+                      value: "github-token"
                     - key: "GITHUB_CREDENTIALS_ID"
                       value: '${JCASC_GITHUB_CREDENTIALS_ID:-github-token}'
                     - key: "SAML_METADATA_URL"
