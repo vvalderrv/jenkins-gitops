@@ -158,7 +158,7 @@ jenkins:
                   - string:
                       id: "${GITHUB_CREDENTIALS_ID}"
                       description: "GitHub opensearch-jenkins service account token"
-                      secret: "op://OpenSearch Project/opensearch-jenkins-github-token/password"
+                      secret: "op://Release Engineering/opensearch-jenkins-github-token/password"
 
                   # SSH Private Key for OpenSearch EC2 Agents
                   - basicSSHUserPrivateKey:
@@ -168,7 +168,7 @@ jenkins:
                       description: "SSH key for OpenSearch EC2 agents"
                       privateKeySource:
                         directEntry:
-                          privateKey: "${op://OpenSearch Project/opensearch-jenkins-ec2-key/private key}"
+                          privateKey: "op://Release Engineering/opensearch-jenkins-ec2-key/text"
 
         unclassified-config: |
           unclassified:
@@ -302,6 +302,13 @@ jenkins:
 
       # 1Password Service Account Token (ESO-managed)
       - name: ONEPASSWORD_SA_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: onepassword-sa-token
+            key: token
+
+      # 1Password CLI Service Account Token (required by 1Password CLI)
+      - name: OP_SERVICE_ACCOUNT_TOKEN
         valueFrom:
           secretKeyRef:
             name: onepassword-sa-token
