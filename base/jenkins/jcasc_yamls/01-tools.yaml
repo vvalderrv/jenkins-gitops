@@ -16,6 +16,11 @@ tool:
       - name: "jdk-17"
         home: "/opt/java/openjdk"
 
+  # Maven Global Configuration
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"
+
   # Git
   git:
     installations:
