@@ -142,6 +142,46 @@ jenkins:
                           resourceRequestCpu: "200m"
                           resourceRequestMemory: "256Mi"
                           resourceLimitCpu: "500m"
+              # EC2 cloud configuration for AWS-based build agents
+              - amazonEC2:
+                  name: "aws-ec2"
+                  region: "us-west-2"
+                  sshKeysCredentialsId: "opensearch-ec2-key"
+                  useInstanceProfileForCredentials: true
+                  templates:
+                    - ami: "ami-01f420019462c36e2"
+                      amiType:
+                        unixData:
+                          sshPort: "22"
+                      associatePublicIp: false
+                      connectBySSHProcess: false
+                      connectionStrategy: PRIVATE_IP
+                      customDeviceMapping: "/dev/xvda=:300:true:::encrypted"
+                      deleteRootOnTermination: true
+                      description: "jenkinsAgentNode-Jenkins-Agent-AL2023-X64-c5.4xlarge-Single-Host"
+                      ebsEncryptRootVolume: ENCRYPTED
+                      ebsOptimized: false
+                      hostKeyVerificationStrategy: OFF
+                      idleTerminationMinutes: "60"
+                      initScript: "sudo dnf clean all && sudo rm -rf /var/cache/dnf && sudo dnf repolist && sudo dnf update --releasever=latest --skip-broken --exclude=openssh* --exclude=docker* --exclude=gh* --exclude=openssl* -y && docker ps"
+                      labelString: "Jenkins-Agent-AL2023-X64-c5.4xlarge-Single-Host"
+                      launchTimeoutStr: "300"
+                      maxTotalUses: 10
+                      metadataEndpointEnabled: true
+                      metadataHopsLimit: "2"
+                      metadataTokensRequired: true
+                      minimumNumberOfInstances: 0
+                      minimumNumberOfSpareInstances: 1
+                      mode: NORMAL
+                      monitoring: false
+                      numExecutors: "1"
+                      remoteUser: "ec2-user"
+                      remoteFs: "/var/jenkins"
+                      stopOnTerminate: false
+                      t2Unlimited: false
+                      tenancy: Default
+                      type: "c5.4xlarge"
+                      useEphemeralDevices: false
 
         credentials-config: |
           credentials:
