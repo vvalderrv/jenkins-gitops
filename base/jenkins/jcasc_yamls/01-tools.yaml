@@ -21,6 +21,14 @@ tool:
     globalSettingsProvider: "standard"
     settingsProvider: "standard"
 
+  # PowerShell installations for cross-platform support
+  powerShell:
+    installations:
+      - name: "DefaultWindows"
+        home: "powershell.exe"
+      - name: "DefaultLinux"
+        home: "pwsh"
+
   # Git
   git:
     installations:
