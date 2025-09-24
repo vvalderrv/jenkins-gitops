@@ -183,7 +183,7 @@ jenkins:
                       monitoring: false
                       numExecutors: "1"
                       remoteUser: "ec2-user"
-                      remoteFs: "/var/jenkins"
+                      remoteFS: "/var/jenkins"
                       stopOnTerminate: false
                       t2Unlimited: false
                       tenancy: Default
