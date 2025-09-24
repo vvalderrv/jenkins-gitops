@@ -175,7 +175,7 @@ jenkins:
                       mode: NORMAL
                       monitoring: false
                       numExecutors: "1"
-                      remoteUser: "ec2-user"
+                      remoteAdmin: "ec2-user"
                       remoteFS: "/var/jenkins"
                       stopOnTerminate: false
                       t2Unlimited: false
