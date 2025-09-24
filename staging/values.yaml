@@ -153,7 +153,6 @@ jenkins:
               - amazonEC2:
                   name: "aws-ec2"
                   region: "us-west-2"
-                  sshKeysCredentialsId: "opensearch-ec2-key"
                   useInstanceProfileForCredentials: true
                   templates:
                     - ami: "ami-01f420019462c36e2"
@@ -215,7 +214,7 @@ jenkins:
                       description: "SSH key for OpenSearch EC2 agents"
                       privateKeySource:
                         directEntry:
-                          privateKey: "op://Release Engineering/opensearch-jenkins-ec2-key/text"
+                          privateKey: "${op://Release Engineering/opensearch-jenkins-ec2-key/text}"
 
         unclassified-config: |
           unclassified:
