@@ -215,7 +215,7 @@ jenkins:
                       description: "SSH key for OpenSearch EC2 agents"
                       privateKeySource:
                         directEntry:
-                          privateKey: "${op://Release Engineering/opensearch-jenkins-ec2-key/private key}"
+                          privateKey: "op://Release Engineering/opensearch-jenkins-ec2-key/private key"
 
         unclassified-config: |
           unclassified:
