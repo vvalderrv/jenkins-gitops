@@ -146,18 +146,19 @@ jenkins:
               - amazonEC2:
                   name: "aws-ec2"
                   region: "us-west-2"
-                  useInstanceProfileForCredentials: true
+                  useInstanceProfileForCredentials: false
                   templates:
                     - ami: "ami-01f420019462c36e2"
                       amiType:
                         unixData:
                           sshPort: "22"
                       associatePublicIp: false
+                      sshCredentialsId: "opensearch-ec2-key"
                       connectBySSHProcess: false
                       connectionStrategy: PRIVATE_IP
                       customDeviceMapping: "/dev/xvda=:300:true:::encrypted"
                       deleteRootOnTermination: true
-                      description: "jenkinsAgentNode-Jenkins-Agent-AL2023-X64-c5.4xlarge-Single-Host"
+                      description: "Jenkins-Agent-AL2023-X64-c5.4xlarge"
                       ebsEncryptRootVolume: ENCRYPTED
                       ebsOptimized: false
                       hostKeyVerificationStrategy: OFF
@@ -171,7 +172,7 @@ jenkins:
                       metadataTokensRequired: true
                       minimumNumberOfInstances: 0
                       minimumNumberOfSpareInstances: 1
-                      mode: NORMAL
+                      mode: EXCLUSIVE
                       monitoring: false
                       numExecutors: "1"
                       remoteAdmin: "ec2-user"
@@ -206,8 +207,7 @@ jenkins:
                       username: "ec2-user"
                       description: "SSH key for OpenSearch EC2 agents"
                       privateKeySource:
-                        directEntry:
-                          privateKey: "${op://Release Engineering/opensearch-jenkins-ec2-key/text}"
+                        privateKey: "${op://Release Engineering/opensearch-jenkins-ec2-key/private key}"
 
         unclassified-config: |
           unclassified:
