@@ -154,13 +154,13 @@ jenkins:
                   name: "aws-ec2"
                   region: "us-west-2"
                   useInstanceProfileForCredentials: false
+                  sshKeysCredentialsId: "opensearch-ec2-key"
                   templates:
                     - ami: "ami-01f420019462c36e2"
                       amiType:
                         unixData:
                           sshPort: "22"
                       associatePublicIp: false
-                      sshCredentialsId: "opensearch-ec2-key"
                       connectBySSHProcess: false
                       connectionStrategy: PRIVATE_IP
                       customDeviceMapping: "/dev/xvda=:300:true:::encrypted"
