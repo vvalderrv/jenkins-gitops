@@ -167,7 +167,7 @@ jenkins:
                   useInstanceProfileForCredentials: false
                   sshKeysCredentialsId: "opensearch-ec2-key"
                   templates:
-                    - ami: "ami-01f420019462c36e2"
+                    - ami: "ami-06a974f9b8a97ecf2"
                       amiType:
                         unixData:
                           sshPort: "22"
@@ -176,7 +176,7 @@ jenkins:
                       connectionStrategy: PRIVATE_IP
                       customDeviceMapping: "/dev/xvda=:300:true:::encrypted"
                       deleteRootOnTermination: true
-                      description: "Jenkins-Agent-AL2023-X64-c5.4xlarge"
+                      description: "jenkins-agent-staging-test"
                       ebsEncryptRootVolume: ENCRYPTED
                       ebsOptimized: false
                       hostKeyVerificationStrategy: OFF
@@ -185,19 +185,20 @@ jenkins:
                         sudo dnf clean all && sudo rm -rf /var/cache/dnf && sudo dnf repolist &&
                         sudo dnf update --releasever=latest --skip-broken --exclude=openssh*
                         --exclude=docker* --exclude=gh* --exclude=openssl* -y && docker ps
-                      labelString: "Jenkins-Agent-AL2023-X64-c5.4xlarge-Single-Host"
+                      labelString: "jenkins-agent-staging-test"
                       launchTimeoutStr: "300"
                       maxTotalUses: 10
                       metadataEndpointEnabled: true
                       metadataHopsLimit: "2"
                       metadataTokensRequired: true
                       minimumNumberOfInstances: 0
-                      minimumNumberOfSpareInstances: 1
-                      mode: EXCLUSIVE
+                      minimumNumberOfSpareInstances: 0
+                      mode: NORMAL
                       monitoring: false
                       numExecutors: "1"
                       remoteAdmin: "ec2-user"
-                      remoteFS: "/var/jenkins"
+                      remoteFS: "/w"
+                      securityGroups: "sg-059f9fb05a8558a93"
                       stopOnTerminate: false
                       t2Unlimited: false
                       tenancy: Default
