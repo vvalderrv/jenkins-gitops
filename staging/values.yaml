@@ -200,7 +200,7 @@ jenkins:
                       numExecutors: "1"
                       remoteAdmin: "ec2-user"
                       remoteFS: "/home/ec2-user"
-                      securityGroups: "jenkins-node-20250827030329319600000004"
+                      # securityGroups: "jenkins-node-20250827030329319600000004" # Removed due to EC2 plugin bug - configure manually in UI
                       stopOnTerminate: false
                       t2Unlimited: false
                       tenancy: Default
