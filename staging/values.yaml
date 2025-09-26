@@ -200,8 +200,7 @@ jenkins:
                       numExecutors: "1"
                       remoteAdmin: "ec2-user"
                       remoteFS: "/home/ec2-user"
-                      securityGroupIds:
-                        - "sg-059f9fb05a8558a93"
+                      securityGroups: "sg-059f9fb05a8558a93"
                       stopOnTerminate: false
                       t2Unlimited: false
                       tenancy: Default
