@@ -220,7 +220,7 @@ jenkins:
                   - string:
                       id: "${GITHUB_CREDENTIALS_ID}"
                       description: "GitHub opensearch-jenkins service account token"
-                      secret: "op://Release Engineering/opensearch-jenkins-github-token/password"
+                      secret: "${OPENSEARCH_GITHUB_TOKEN}"
 
                   # SSH Private Key for OpenSearch EC2 Agents
                   - basicSSHUserPrivateKey:
@@ -230,7 +230,7 @@ jenkins:
                       description: "SSH key for OpenSearch EC2 agents"
                       privateKeySource:
                         directEntry:
-                          privateKey: "op://Release Engineering/opensearch-jenkins-ec2-key/private key"
+                          privateKey: "${OPENSEARCH_EC2_PRIVATE_KEY}"
 
         unclassified-config: |
           unclassified:
@@ -368,6 +368,20 @@ jenkins:
         secretKeyRef:
           name: onepassword-sa-token
           key: token
+
+    # EC2 SSH Private Key (ESO-managed from 1Password)
+    - name: OPENSEARCH_EC2_PRIVATE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: opensearch-jenkins-ec2-key
+          key: private-key
+
+    # GitHub Token (ESO-managed from 1Password)
+    - name: OPENSEARCH_GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: opensearch-jenkins-github-token
+          key: password
 
     # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
     - name: JCASC_KUBERNETES_URL
