@@ -30,7 +30,7 @@ jenkins:
     image:
       registry: "ghcr.io"
       repository: "lfit/jenkins"
-      tag: "main-990a6cc"
+      tag: "main-9c0bed0"
       pullPolicy: "IfNotPresent"
 
     # Plugin management - use only plugins baked into image
