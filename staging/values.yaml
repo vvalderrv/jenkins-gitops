@@ -167,7 +167,7 @@ jenkins:
                   useInstanceProfileForCredentials: false
                   sshKeysCredentialsId: "opensearch-ec2-key"
                   templates:
-                    - ami: "ami-06a974f9b8a97ecf2"
+                    - ami: "ami-0095b2d932ba790f3"
                       amiType:
                         unixData:
                           sshPort: "22"
@@ -184,7 +184,9 @@ jenkins:
                       initScript: >
                         sudo dnf clean all && sudo rm -rf /var/cache/dnf && sudo dnf repolist &&
                         sudo dnf update --releasever=latest --skip-broken --exclude=openssh*
-                        --exclude=docker* --exclude=gh* --exclude=openssl* -y && docker ps
+                        --exclude=docker* --exclude=gh* --exclude=openssl* -y &&
+                        sudo dnf install -y java-17-openjdk-devel git &&
+                        docker ps
                       labelString: "jenkins-agent-staging-test"
                       launchTimeoutStr: "300"
                       maxTotalUses: 10
