@@ -72,9 +72,6 @@ RUN mkdir -p /var/jenkins && chown -R jenkins:jenkins /var/jenkins
 # Switch back to jenkins user
 USER jenkins
 
-# Create 1Password CLI config directory with correct permissions
-RUN mkdir -m 700 -p /var/jenkins_home/.config/op
-
 # Install Jenkins plugins
 RUN jenkins-plugin-cli --verbose --plugin-file /usr/share/jenkins/ref/plugins.txt
 

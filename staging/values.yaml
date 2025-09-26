@@ -33,6 +33,17 @@ jenkins:
       tag: "main-9c0bed0"
       pullPolicy: "IfNotPresent"
 
+    # Lifecycle hooks to fix 1Password CLI directory permissions after fsGroup applies
+    lifecycle:
+      postStart:
+        exec:
+          command:
+          - "/bin/sh"
+          - "-c"
+          # yamllint disable-line rule:line-length
+          - "mkdir -p /var/jenkins_home/.config/op && chmod 700 /var/jenkins_home/.config/op && if [ -f /var/jenkins_home/.config/op/config ]; then chmod 600 /var/jenkins_home/.config/op/config; else echo '[INFO] /var/jenkins_home/.config/op/config does not exist, skipping chmod'; fi"
+          # yamllint enable-line rule:line-length
+
     # Plugin management - use only plugins baked into image
     # Prevents plugin version conflicts in staging environment
     installPlugins: false
@@ -170,7 +181,10 @@ jenkins:
                       ebsOptimized: false
                       hostKeyVerificationStrategy: OFF
                       idleTerminationMinutes: "60"
-                      initScript: "sudo dnf clean all && sudo rm -rf /var/cache/dnf && sudo dnf repolist && sudo dnf update --releasever=latest --skip-broken --exclude=openssh* --exclude=docker* --exclude=gh* --exclude=openssl* -y && docker ps"
+                      initScript: >
+                        sudo dnf clean all && sudo rm -rf /var/cache/dnf && sudo dnf repolist &&
+                        sudo dnf update --releasever=latest --skip-broken --exclude=openssh*
+                        --exclude=docker* --exclude=gh* --exclude=openssl* -y && docker ps
                       labelString: "Jenkins-Agent-AL2023-X64-c5.4xlarge-Single-Host"
                       launchTimeoutStr: "300"
                       maxTotalUses: 10
@@ -281,88 +295,88 @@ jenkins:
     # Variables consumed by: base/jenkins/jcasc_yamls/ configuration files
     # Environment-specific values for staging deployment context
     containerEnv:
-      # System Configuration (01-global-env-vars.yaml)
-      - name: JCASC_SILO
-        value: "staging"
-      - name: JCASC_JENKINS_URL
-        value: "https://jenkins-stag.opensearch.cluster.linuxfound.info/"
-      - name: JENKINS_URL
-        value: "https://jenkins-stag.opensearch.cluster.linuxfound.info/"
-      - name: JCASC_LOCATION_URL
-        value: ""
-      - name: JCASC_LOCATION_ADMINADDRESS
-        value: ""
-      - name: JCASC_SYSTEM_MESSAGE
-        value: "Welcome to Jenkins (Staging Environment)"
-      - name: JCASC_MASTER_LABELS
-        value: "staging-controller"
-      - name: JCASC_RESOURCE_ROOT_URL
-        value: ""
+    # System Configuration (01-global-env-vars.yaml)
+    - name: JCASC_SILO
+      value: "staging"
+    - name: JCASC_JENKINS_URL
+      value: "https://jenkins-stag.opensearch.cluster.linuxfound.info/"
+    - name: JENKINS_URL
+      value: "https://jenkins-stag.opensearch.cluster.linuxfound.info/"
+    - name: JCASC_LOCATION_URL
+      value: ""
+    - name: JCASC_LOCATION_ADMINADDRESS
+      value: ""
+    - name: JCASC_SYSTEM_MESSAGE
+      value: "Welcome to Jenkins (Staging Environment)"
+    - name: JCASC_MASTER_LABELS
+      value: "staging-controller"
+    - name: JCASC_RESOURCE_ROOT_URL
+      value: ""
 
-      # Build and Performance Configuration
-      - name: JCASC_BUILD_TIMEOUT
-        value: "3600"
-      - name: JCASC_MAVEN_OPTS
-        value: "-Xmx2048m -XX:MaxMetaspaceSize=512m"
-      - name: JCASC_NODE_OPTIONS
-        value: "--max-old-space-size=4096"
-      - name: JCASC_SCM_POLLING_THREADCOUNT
-        value: "5"
+    # Build and Performance Configuration
+    - name: JCASC_BUILD_TIMEOUT
+      value: "3600"
+    - name: JCASC_MAVEN_OPTS
+      value: "-Xmx2048m -XX:MaxMetaspaceSize=512m"
+    - name: JCASC_NODE_OPTIONS
+      value: "--max-old-space-size=4096"
+    - name: JCASC_SCM_POLLING_THREADCOUNT
+      value: "5"
 
-      # Integration Configuration (placeholders for future configuration)
-      - name: JCASC_LOG_LEVEL
-        value: "ERROR"
-      - name: JCASC_ARTIFACTORY_URL
-        value: ""
-      - name: JCASC_DOCKER_REGISTRY
-        value: ""
-      - name: GITHUB_CREDENTIALS_ID
-        value: "github-token"
-      - name: JCASC_S3_BUCKET
-        value: ""
-      - name: JCASC_CDN_URL
-        value: ""
-      - name: JCASC_ARTIFACTS_RETENTION_DAYS
-        value: ""
-      - name: JCASC_ECR_REGISTRY_URL
-        value: ""
+    # Integration Configuration (placeholders for future configuration)
+    - name: JCASC_LOG_LEVEL
+      value: "ERROR"
+    - name: JCASC_ARTIFACTORY_URL
+      value: ""
+    - name: JCASC_DOCKER_REGISTRY
+      value: ""
+    - name: GITHUB_CREDENTIALS_ID
+      value: "github-token"
+    - name: JCASC_S3_BUCKET
+      value: ""
+    - name: JCASC_CDN_URL
+      value: ""
+    - name: JCASC_ARTIFACTS_RETENTION_DAYS
+      value: ""
+    - name: JCASC_ECR_REGISTRY_URL
+      value: ""
 
-      # Security Configuration (02-security.yaml integration)
-      - name: JCASC_ADMIN_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: jenkins-lf-admin
-            key: admin-password
+    # Security Configuration (02-security.yaml integration)
+    - name: JCASC_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: jenkins-lf-admin
+          key: admin-password
 
-      # SAML Configuration
-      - name: SAML_METADATA_URL
-        value: "https://sso.linuxfoundation.org/samlp/metadata/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ"
-      - name: SAML_LOGOUT_URL
-        value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
+    # SAML Configuration
+    - name: SAML_METADATA_URL
+      value: "https://sso.linuxfoundation.org/samlp/metadata/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ"
+    - name: SAML_LOGOUT_URL
+      value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
 
-      # 1Password Service Account Token (ESO-managed)
-      - name: ONEPASSWORD_SA_TOKEN
-        valueFrom:
-          secretKeyRef:
-            name: onepassword-sa-token
-            key: token
+    # 1Password Service Account Token (ESO-managed)
+    - name: ONEPASSWORD_SA_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: onepassword-sa-token
+          key: token
 
-      # 1Password CLI Service Account Token (required by 1Password CLI)
-      - name: OP_SERVICE_ACCOUNT_TOKEN
-        valueFrom:
-          secretKeyRef:
-            name: onepassword-sa-token
-            key: token
+    # 1Password CLI Service Account Token (required by 1Password CLI)
+    - name: OP_SERVICE_ACCOUNT_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: onepassword-sa-token
+          key: token
 
-      # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
-      - name: JCASC_KUBERNETES_URL
-        value: "https://kubernetes.default.svc.cluster.local"
-      - name: JCASC_KUBERNETES_NAMESPACE
-        value: "jenkins-staging"
-      - name: JCASC_KUBERNETES_JENKINS_URL
-        value: "http://jenkins-staging.jenkins-staging.svc.cluster.local:8080"
-      - name: JCASC_KUBERNETES_JENKINS_TUNNEL
-        value: "jenkins-staging-agent.jenkins-staging.svc.cluster.local:50000"
+    # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
+    - name: JCASC_KUBERNETES_URL
+      value: "https://kubernetes.default.svc.cluster.local"
+    - name: JCASC_KUBERNETES_NAMESPACE
+      value: "jenkins-staging"
+    - name: JCASC_KUBERNETES_JENKINS_URL
+      value: "http://jenkins-staging.jenkins-staging.svc.cluster.local:8080"
+    - name: JCASC_KUBERNETES_JENKINS_TUNNEL
+      value: "jenkins-staging-agent.jenkins-staging.svc.cluster.local:50000"
 
     # External access configuration for staging environment
     # Provides public access for development and testing workflows
@@ -375,9 +389,9 @@ jenkins:
       hostName: jenkins-stag.opensearch.cluster.linuxfound.info
       path: /
       tls:
-        - secretName: jenkins-staging-tls
-          hosts:
-            - jenkins-stag.opensearch.cluster.linuxfound.info
+      - secretName: jenkins-staging-tls
+        hosts:
+        - jenkins-stag.opensearch.cluster.linuxfound.info
 
   # Defining resource requests and limits for the staging environment.
   resources:
