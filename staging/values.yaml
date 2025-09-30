@@ -200,7 +200,8 @@ jenkins:
                       numExecutors: "1"
                       remoteAdmin: "ec2-user"
                       remoteFS: "/home/ec2-user"
-                      # securityGroups: "jenkins-node-20250827030329319600000004" # Removed due to EC2 plugin bug - configure manually in UI
+                      securityGroups: "jenkins-worker"
+                      subnetId: "subnet-04399db8294cd0293 subnet-0ef5970bb206ba8d6 subnet-0134f063a963ef06e"
                       stopOnTerminate: false
                       t2Unlimited: false
                       tenancy: Default
