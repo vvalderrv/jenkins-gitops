@@ -33,9 +33,27 @@ jenkins:
       tag: "main-990a6cc"
       pullPolicy: "Always"
 
+    # Lifecycle hooks to fix 1Password CLI directory permissions after fsGroup applies
+    lifecycle:
+      postStart:
+        exec:
+          command:
+            - "/bin/sh"
+            - "-c"
+            # yamllint disable-line rule:line-length
+            - "mkdir -p /var/jenkins_home/.config/op && chmod 700 /var/jenkins_home/.config/op && if [ -f /var/jenkins_home/.config/op/config ]; then chmod 600 /var/jenkins_home/.config/op/config; else echo '[INFO] /var/jenkins_home/.config/op/config does not exist, skipping chmod'; fi"
+            # yamllint enable-line rule:line-length
+
     # Plugin management - use only plugins baked into image
     # Prevents plugin version conflicts in production environment
     installPlugins: false
+
+    # Kubernetes health probe configuration for production environment
+    # Increase startup probe timeout to accommodate Jenkins initialization with plugins
+    # Default: 12 failures × 10s = 120s, Updated: 18 failures × 10s = 180s (3 minutes)
+    probes:
+      startupProbe:
+        failureThreshold: 18
 
     # Jenkins Configuration as Code
     JCasC:
@@ -196,13 +214,13 @@ jenkins:
                   - string:
                       id: "onepassword-service-account"
                       description: "1Password service account token for secret access"
-                      secret: "${ONEPASSWORD_SA_TOKEN:-}"
+                      secret: "${ONEPASSWORD_SA_TOKEN}"
 
                   # GitHub Service Account Token for CI/CD Operations
                   - string:
                       id: "${GITHUB_CREDENTIALS_ID}"
                       description: "GitHub opensearch-jenkins service account token"
-                      secret: "op://Release Engineering/opensearch-jenkins-github-token/password"
+                      secret: "${OPENSEARCH_GITHUB_TOKEN}"
 
                   # SSH Private Key for OpenSearch EC2 Agents
                   - basicSSHUserPrivateKey:
@@ -212,7 +230,7 @@ jenkins:
                       description: "SSH key for OpenSearch EC2 agents"
                       privateKeySource:
                         directEntry:
-                          privateKey: "op://Release Engineering/opensearch-jenkins-ec2-key/private key"
+                          privateKey: "${OPENSEARCH_EC2_PRIVATE_KEY}"
 
         unclassified-config: |
           unclassified:
@@ -358,9 +376,19 @@ jenkins:
             name: onepassword-sa-token
             key: token
 
-      # GitHub Credentials Configuration
-      - name: JCASC_GITHUB_CREDENTIALS_ID
-        value: "github-token"
+      # EC2 SSH Private Key (ESO-managed from 1Password)
+      - name: OPENSEARCH_EC2_PRIVATE_KEY
+        valueFrom:
+          secretKeyRef:
+            name: opensearch-jenkins-ec2-key
+            key: private-key
+
+      # GitHub Token (ESO-managed from 1Password)
+      - name: OPENSEARCH_GITHUB_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: opensearch-jenkins-github-token
+            key: password
 
       # Kubernetes Cloud Configuration (07-cloud-agents.yaml integration)
       - name: JCASC_KUBERNETES_URL
