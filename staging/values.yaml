@@ -117,6 +117,15 @@ jenkins:
                 logoutUrl: "${SAML_LOGOUT_URL}"
                 maximumAuthenticationLifetime: 86400
 
+            # Authorization strategy - allow anonymous read access
+            authorizationStrategy:
+              globalMatrix:
+                permissions:
+                  - "Overall/Administer:authenticated"
+                  - "Overall/Read:anonymous"
+                  - "Job/Read:anonymous"
+                  - "View/Read:anonymous"
+
             # Kubernetes cloud configuration for dynamic build agents
             clouds:
               - kubernetes:
