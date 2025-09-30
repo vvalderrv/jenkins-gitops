@@ -65,13 +65,6 @@ jenkins:
 
         jenkins-config: |
           jenkins:
-            # System message configuration
-            systemMessage: |
-              1Password Integration Status:
-              - Plugin: OnePassword Integration for Build Secrets
-              - Service Account: Available via onepassword-sa-token cluster secret
-              - GitHub Token: opensearch-jenkins service account configured
-
             # Global environment variables available to all Jenkins jobs
             globalNodeProperties:
               - envVars:
