@@ -314,8 +314,6 @@ jenkins:
         value: ""
       - name: JCASC_LOCATION_ADMINADDRESS
         value: ""
-      - name: JCASC_SYSTEM_MESSAGE
-        value: "Welcome to Jenkins (Production Environment)"
       - name: JCASC_MASTER_LABELS
         value: "prod-controller"
       - name: JCASC_RESOURCE_ROOT_URL

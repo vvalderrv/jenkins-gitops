@@ -40,7 +40,6 @@ jenkinsEnvVars:
   JCASC_GIT_URL: "https://github.com"
   JCASC_S3_BUCKET: ""
   JCASC_CDN_URL: ""
-  JCASC_SYSTEM_MESSAGE: "Welcome to Jenkins (Development Environment)"
   JCASC_LOCATION_URL: ""
   JCASC_LOCATION_ADMINADDRESS: "dev-admin@example.com"
   JCASC_MASTER_LABELS: "dev-master local"
