@@ -356,9 +356,9 @@ jenkins:
 
       # SAML Configuration
       - name: SAML_METADATA_URL
-        value: "https://sso.linuxfoundation.org/samlp/metadata/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ"
+        value: "https://sso.linuxfoundation.org/samlp/metadata/BLgSYAt8E0oXf5EJSWxeuAnUP2JZUg46"
       - name: SAML_LOGOUT_URL
-        value: "https://sso.linuxfoundation.org/samlp/Sa8MIoI91JUE3154tjDzTATsEeiehGaZ/logout"
+        value: "https://sso.linuxfoundation.org/samlp/BLgSYAt8E0oXf5EJSWxeuAnUP2JZUg46/logout"
 
       # 1Password Service Account Token (ESO-managed)
       - name: ONEPASSWORD_SA_TOKEN
