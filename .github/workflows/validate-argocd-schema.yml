@@ -55,5 +55,5 @@ jobs:
             -output text \
             -kubernetes-version 1.33.0 \
             -schema-location default \
-            -schema-location 'https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.0/manifests/crds/{{.ResourceKind}}_{{.ResourceAPIVersion}}.yaml' \
+            -schema-location 'https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.0/manifests/crds/{{.ResourceKind | lower}}-crd.yaml' \
             argocd-apps/
