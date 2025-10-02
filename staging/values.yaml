@@ -209,6 +209,44 @@ jenkins:
                       tenancy: Default
                       type: "c5.4xlarge"
                       useEphemeralDevices: false
+                    - ami: "ami-057958fcf37e192f1"
+                      amiType:
+                        unixData:
+                          sshPort: "22"
+                      associatePublicIp: false
+                      connectBySSHProcess: false
+                      connectionStrategy: PRIVATE_IP
+                      customDeviceMapping: "/dev/xvda=:300:true:::encrypted"
+                      deleteRootOnTermination: true
+                      description: "jenkins-agent-stg-al2023-x64-c54xlarge"
+                      ebsEncryptRootVolume: ENCRYPTED
+                      ebsOptimized: false
+                      hostKeyVerificationStrategy: OFF
+                      idleTerminationMinutes: "60"
+                      initScript: >
+                        sudo dnf clean all && sudo rm -rf /var/cache/dnf && sudo dnf repolist &&
+                        sudo dnf update --releasever=latest --skip-broken --exclude=openssh*
+                        --exclude=docker* --exclude=gh* --exclude=openssl* -y && docker ps
+                      labelString: "jenkins-agent-stg-al2023-x64-c54xlarge"
+                      launchTimeoutStr: "300"
+                      maxTotalUses: 10
+                      metadataEndpointEnabled: true
+                      metadataHopsLimit: "2"
+                      metadataTokensRequired: true
+                      minimumNumberOfInstances: 0
+                      minimumNumberOfSpareInstances: 1
+                      mode: EXCLUSIVE
+                      monitoring: false
+                      numExecutors: "1"
+                      remoteAdmin: "ec2-user"
+                      remoteFS: "/var/jenkins"
+                      securityGroups: "jenkins-worker"
+                      subnetId: "subnet-04399db8294cd0293 subnet-0ef5970bb206ba8d6 subnet-0134f063a963ef06e"
+                      stopOnTerminate: false
+                      t2Unlimited: false
+                      tenancy: Default
+                      type: "c5.4xlarge"
+                      useEphemeralDevices: false
 
         credentials-config: |
           credentials:
