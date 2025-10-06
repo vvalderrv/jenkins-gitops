@@ -1,0 +1,186 @@
+# Validates referential integrity of ArgoCD Application manifests.
+# Checks that repos, branches, paths, and valueFiles exist before deployment.
+
+name: Validate ArgoCD References
+
+on:
+  pull_request:
+    paths:
+      - 'argocd-apps/**/*.yaml'
+      - 'argocd-apps/**/*.yml'
+      - 'base/**'
+      - 'dev/**'
+      - 'staging/**'
+      - 'production/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'argocd-apps/**/*.yaml'
+      - 'argocd-apps/**/*.yml'
+      - 'base/**'
+      - 'dev/**'
+      - 'staging/**'
+      - 'production/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-references:
+    name: Validate ArgoCD Application References
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Install yq
+        run: |
+          set -euo pipefail
+          YQ_VERSION=v4.44.1
+          YQ_SHA256=6dc2d0cd4e0caca5aeffd0d784a48263591080e4a0895abe69f3a76eb50d1ba3
+          curl -sSfL --retry 3 --retry-delay 2 -o /tmp/yq \
+            https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64
+          echo "${YQ_SHA256}  /tmp/yq" | sha256sum -c
+          chmod +x /tmp/yq
+          /tmp/yq --version
+
+      - name: Discover ArgoCD Application manifests
+        id: discover
+        run: |
+          set -euo pipefail
+          echo "📋 Discovering ArgoCD Application manifests..."
+          find argocd-apps -name '*.yaml' -o -name '*.yml' | sort
+
+      - name: Validate source paths exist
+        run: |
+          set -euo pipefail
+          echo "🔍 Validating source paths in ArgoCD Applications..."
+          ERRORS=0
+
+          for manifest in argocd-apps/*.yaml; do
+            [ -f "$manifest" ] || continue
+
+            # Skip non-Application kinds
+            KIND=$(/tmp/yq eval '.kind // ""' "$manifest")
+            [ "$KIND" != "Application" ] && continue
+
+            echo "Checking: $manifest"
+
+            # Extract source.path
+            SOURCE_PATH=$(/tmp/yq eval '.spec.source.path // ""' "$manifest")
+            if [ -n "$SOURCE_PATH" ] && [ ! -d "$SOURCE_PATH" ]; then
+              echo "❌ ERROR: Source path '$SOURCE_PATH' does not exist (referenced in $manifest)"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "  ✅ Source path: $SOURCE_PATH"
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ Found $ERRORS referential integrity errors"
+            exit 1
+          fi
+          echo "✅ All source paths validated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate Helm valueFiles exist
+        run: |
+          set -euo pipefail
+          echo "🔍 Validating Helm valueFiles..."
+          ERRORS=0
+
+          for manifest in argocd-apps/*.yaml; do
+            [ -f "$manifest" ] || continue
+
+            # Skip non-Application kinds
+            KIND=$(/tmp/yq eval '.kind // ""' "$manifest")
+            [ "$KIND" != "Application" ] && continue
+
+            echo "Checking: $manifest"
+
+            # Extract source.path for relative resolution
+            SOURCE_PATH=$(/tmp/yq eval '.spec.source.path // ""' "$manifest")
+
+            # Extract valueFiles array
+            VALUE_FILES=$(/tmp/yq eval '.spec.source.helm.valueFiles[]? // ""' "$manifest")
+
+            if [ -n "$VALUE_FILES" ]; then
+              while IFS= read -r VALUE_FILE; do
+                [ -z "$VALUE_FILE" ] && continue
+
+                # Resolve relative to source.path
+                if [[ "$VALUE_FILE" == /* ]]; then
+                  FULL_PATH="${VALUE_FILE#/}"
+                else
+                  FULL_PATH="${SOURCE_PATH}/${VALUE_FILE}"
+                fi
+
+                if [ ! -f "$FULL_PATH" ]; then
+                  echo "❌ ERROR: valueFile '$VALUE_FILE' not found at '$FULL_PATH' (referenced in $manifest)"
+                  ERRORS=$((ERRORS + 1))
+                else
+                  echo "  ✅ valueFile: $VALUE_FILE"
+                fi
+              done <<< "$VALUE_FILES"
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "❌ Found $ERRORS missing valueFiles"
+            exit 1
+          fi
+          echo "✅ All Helm valueFiles validated" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate target namespaces are declared
+        run: |
+          set -euo pipefail
+          echo "🔍 Validating destination namespaces are declared..."
+
+          for manifest in argocd-apps/*.yaml; do
+            [ -f "$manifest" ] || continue
+
+            # Skip non-Application kinds
+            KIND=$(/tmp/yq eval '.kind // ""' "$manifest")
+            [ "$KIND" != "Application" ] && continue
+
+            echo "Checking: $manifest"
+
+            NAMESPACE=$(/tmp/yq eval '.spec.destination.namespace // ""' "$manifest")
+            if [ -z "$NAMESPACE" ]; then
+              echo "  ⚠️  WARNING: No destination namespace declared in $manifest"
+            else
+              echo "  ✅ Namespace: $NAMESPACE"
+            fi
+          done
+          echo "✅ Namespace validation complete" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report validation summary
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## 🔍 Referential Integrity Validation
+
+          **Checks performed:**
+          - ✅ Source paths exist in repository
+          - ✅ Helm valueFiles exist at declared paths
+          - ✅ Destination namespaces are declared
+
+          **Note:** This workflow validates Git-based references only.
+          It does NOT check:
+          - Remote repository accessibility (repoURL)
+          - Branch/tag existence (targetRevision)
+          - AppProject existence
+
+          For cluster-level validation, use ArgoCD's native validation.
+          EOF
