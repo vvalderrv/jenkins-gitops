@@ -50,7 +50,7 @@ jobs:
           echo "${KUBECONFORM_SHA256}  /tmp/kubeconform.tar.gz" | sha256sum -c
           tar -xzf /tmp/kubeconform.tar.gz -C /tmp
           chmod +x /tmp/kubeconform
-          /tmp/kubeconform -version
+          /tmp/kubeconform -v
 
       - name: Validate ArgoCD manifests
         run: |
