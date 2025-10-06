@@ -1,0 +1,77 @@
+# Scans ArgoCD manifests and configurations for security issues.
+# Combines secret scanning (Gitleaks) and policy validation (Checkov).
+
+name: Scan ArgoCD Security
+
+on:
+  pull_request:
+    paths:
+      - 'argocd-apps/**/*.yaml'
+      - 'argocd-apps/**/*.yml'
+      - 'base/**'
+      - 'dev/**'
+      - 'staging/**'
+      - 'production/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'argocd-apps/**/*.yaml'
+      - 'argocd-apps/**/*.yml'
+      - 'base/**'
+      - 'dev/**'
+      - 'staging/**'
+      - 'production/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secret-scan:
+    name: Scan for Secrets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_SUMMARY: true
+
+  policy-scan:
+    name: Scan Security Policies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf # v12.1347.0
+        with:
+          directory: .
+          framework: kubernetes,helm
+          quiet: true
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+          # soft_fail: Reports violations without blocking PRs.
+          soft_fail: true
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@256ed127a6f1d1e5a3eddfc3cbd84aee45b72290 # v3
+        if: success() || failure()
+        with:
+          sarif_file: results.sarif
