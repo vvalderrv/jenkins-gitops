@@ -44,11 +44,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_ENABLE_SUMMARY: true
+      - name: Run Gitleaks CLI
+        run: |
+          # Install Gitleaks CLI
+          # No license required for CLI usage
+          GITLEAKS_VERSION=8.21.2
+          GITLEAKS_TAR="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          GITLEAKS_URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${GITLEAKS_TAR}"
+          GITLEAKS_CHECKSUMS_URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/checksums.txt"
+
+          wget -q "$GITLEAKS_URL"
+          wget -q "$GITLEAKS_CHECKSUMS_URL"
+
+          # Verify checksum
+          EXPECTED_SUM=$(grep "$GITLEAKS_TAR" checksums.txt | awk '{print $1}')
+          ACTUAL_SUM=$(sha256sum "$GITLEAKS_TAR" | awk '{print $1}')
+          if [ "$EXPECTED_SUM" != "$ACTUAL_SUM" ]; then
+            echo "Checksum verification failed for $GITLEAKS_TAR"
+            exit 1
+          fi
+
+          tar -xzf "$GITLEAKS_TAR"
+          chmod +x gitleaks
+
+          # Run scan
+          # exit-code 1 fails job if secrets detected
+          ./gitleaks detect --source . --verbose --no-git --exit-code 1
 
   policy-scan:
     name: Scan Security Policies
@@ -60,18 +81,19 @@ jobs:
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf # v12.1347.0
+        # v12.1347.0
+        uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf
         with:
           directory: .
-          framework: kubernetes,helm
+          framework: kubernetes helm
           quiet: true
-          output_format: cli,sarif
-          output_file_path: console,results.sarif
-          # soft_fail: Reports violations without blocking PRs.
+          output_format: sarif
+          # Reports violations without blocking PRs
           soft_fail: true
 
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@256ed127a6f1d1e5a3eddfc3cbd84aee45b72290 # v3
+        # v3
+        uses: github/codeql-action/upload-sarif@256ed127a6f1d1e5a3eddfc3cbd84aee45b72290
         if: success() || failure()
         with:
           sarif_file: results.sarif

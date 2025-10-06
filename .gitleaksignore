@@ -1,0 +1,10 @@
+# Gitleaks ignore file - suppresses false positives by fingerprint
+# Each fingerprint uniquely identifies a specific finding
+# See: https://github.com/gitleaks/gitleaks#gitleaksignore
+
+# Helm Secret templates - contain {{ .Values.* }} placeholders, not real secrets
+base/jenkins/templates/ec2-key-secret.yaml:kubernetes-secret-yaml:8
+base/jenkins/templates/github-token-secret.yaml:kubernetes-secret-yaml:8
+
+# Documentation may contain example patterns
+README.md
