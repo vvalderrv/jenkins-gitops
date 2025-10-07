@@ -1,6 +1,9 @@
+# Validates Dockerfile for Jenkins image build.
+# Combines Hadolint linting, build testing, base image currency check, and security enforcement.
+
 name: Validate Dockerfile
 
-on:
+"on":
   push:
     branches:
       - main
@@ -14,14 +17,43 @@ on:
       - 'build/Dockerfile'
       - 'build/plugins.txt'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   dockerfile-validation:
     name: Lint and Security Scan Dockerfile
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Install Hadolint
+        run: |
+          HADOLINT_VERSION=2.14.0
+          HADOLINT_BINARY="hadolint-Linux-x86_64"
+          HADOLINT_URL="https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/${HADOLINT_BINARY}"
+          # SHA256 verified from https://github.com/hadolint/hadolint/releases/tag/v2.14.0
+          HADOLINT_SHA256="6bf226944684f56c84dd014e8b979d27425c0148f61b3bd99bcc6f39e9dc5a47"
+
+          curl -Lo hadolint "$HADOLINT_URL"
+
+          # Verify checksum
+          echo "${HADOLINT_SHA256}  hadolint" | sha256sum -c -
+
+          chmod +x hadolint
+          sudo mv hadolint /usr/local/bin/
+
+      - name: Run Hadolint
+        run: |
+          echo "Running Hadolint on Dockerfile..."
+          hadolint build/Dockerfile
 
       - name: Build test image for validation
         run: |
@@ -43,27 +75,16 @@ jobs:
 
           echo "Base image check completed"
 
-      - name: Validate Dockerfile best practices
+      - name: Enforce non-root user
         run: |
-          echo "Checking Dockerfile best practices..."
+          echo "Verifying Dockerfile uses non-root user..."
 
-          # Check for non-root user
           if ! grep -q "USER jenkins" build/Dockerfile; then
-            echo "ERROR: Dockerfile should end with non-root user"
+            echo "ERROR: Dockerfile must use non-root USER (expected: USER jenkins)"
             exit 1
           fi
 
-          # Check for proper layer optimization
-          if [ $(grep -c "^RUN" build/Dockerfile) -gt 5 ]; then
-            echo "WARNING: Consider combining RUN statements to reduce layers"
-          fi
-
-          # Check for LABEL maintainer
-          if ! grep -q "LABEL maintainer" build/Dockerfile; then
-            echo "WARNING: Consider adding LABEL maintainer"
-          fi
-
-          echo "Dockerfile best practices validation completed"
+          echo "Non-root user check passed"
 
       - name: Cleanup
         if: always()
