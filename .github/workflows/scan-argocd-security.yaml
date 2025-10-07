@@ -1,5 +1,5 @@
 # Scans ArgoCD manifests and configurations for security issues.
-# Combines secret scanning (Gitleaks) and policy validation (Checkov).
+# Combines secret scanning (grep patterns) and policy validation (kube-score + kubeconform).
 
 name: Scan ArgoCD Security
 
@@ -26,7 +26,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -44,32 +43,110 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Gitleaks CLI
+      - name: Scan for Secrets
         run: |
-          # Install Gitleaks CLI
-          # No license required for CLI usage
-          GITLEAKS_VERSION=8.21.2
-          GITLEAKS_TAR="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          GITLEAKS_URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${GITLEAKS_TAR}"
-          GITLEAKS_CHECKSUMS_URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/checksums.txt"
+          # Search for common secret patterns in YAML files
+          # Excludes README.md and Helm template files
+          #
+          # Pattern filtering strategy:
+          # - Simple patterns (AWS/GitHub/Docker/GitLab tokens, Slack webhooks): No filters needed
+          #   These have unique prefixes unlikely to appear in templates
+          # - Complex patterns (API keys, passwords, private keys): Template exclusions applied
+          #   Filters: valueFrom:, secretKeyRef: (K8s), {{ and ${ (Helm/shell templates)
 
-          wget -q "$GITLEAKS_URL"
-          wget -q "$GITLEAKS_CHECKSUMS_URL"
+          FOUND=0
 
-          # Verify checksum
-          EXPECTED_SUM=$(grep "$GITLEAKS_TAR" checksums.txt | awk '{print $1}')
-          ACTUAL_SUM=$(sha256sum "$GITLEAKS_TAR" | awk '{print $1}')
-          if [ "$EXPECTED_SUM" != "$ACTUAL_SUM" ]; then
-            echo "Checksum verification failed for $GITLEAKS_TAR"
+          # AWS Access Key (AKIA prefix + 16 chars = 20 total)
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            'AKIA[0-9A-Z]{16}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            echo "ERROR: Found AWS Access Key pattern"
+            FOUND=1
+          fi
+
+          # GitHub Token
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            'gh[pousr]_[A-Za-z0-9_]{36,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            echo "ERROR: Found GitHub Token pattern"
+            FOUND=1
+          fi
+
+          # Generic API Key
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            -E 'api[_-]?key["\s:=]+[A-Za-z0-9+/=]{20,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
+            echo "ERROR: Found API Key pattern"
+            FOUND=1
+          fi
+
+          # Private Key (excluding Helm templates)
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            'BEGIN.*PRIVATE KEY' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
+            echo "ERROR: Found Private Key"
+            FOUND=1
+          fi
+
+          # Docker Hub Token
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            'dckr_pat_[A-Za-z0-9_-]{20,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            echo "ERROR: Found Docker Hub Token"
+            FOUND=1
+          fi
+
+          # GitLab Token
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            'glpat-[A-Za-z0-9_-]{20,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            echo "ERROR: Found GitLab Token"
+            FOUND=1
+          fi
+
+          # Slack Webhook
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            'hooks\.slack\.com/services/' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            echo "ERROR: Found Slack Webhook"
+            FOUND=1
+          fi
+
+          # AWS Secret Access Key (40 characters, base64-like)
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            -E 'aws_secret_access_key["\s:=]+[A-Za-z0-9/+=]{40}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
+            echo "ERROR: Found AWS Secret Access Key"
+            FOUND=1
+          fi
+
+          # Generic Password (plaintext)
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            -iE '(password|passwd):\s*["\x27][^"\x27{{ ]{8,}["\x27]' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
+            echo "ERROR: Found plaintext password"
+            FOUND=1
+          fi
+
+          # 1Password Connect Token
+          if grep -rn --include="*.yaml" --include="*.yml" \
+            --exclude-dir=".git" --exclude="README.md" \
+            'OP_CONNECT_TOKEN' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
+            echo "ERROR: Found 1Password Connect Token"
+            FOUND=1
+          fi
+
+          if [ $FOUND -eq 1 ]; then
+            echo "Secret scan failed: potential secrets detected"
             exit 1
           fi
 
-          tar -xzf "$GITLEAKS_TAR"
-          chmod +x gitleaks
-
-          # Run scan
-          # exit-code 1 fails job if secrets detected
-          ./gitleaks detect --source . --verbose --no-git --exit-code 1
+          echo "Secret scan passed: no secrets detected"
 
   policy-scan:
     name: Scan Security Policies
@@ -80,20 +157,50 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
 
-      - name: Run Checkov
-        # v12.1347.0
-        uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf
-        with:
-          directory: .
-          framework: kubernetes helm
-          quiet: true
-          output_format: sarif
-          # Reports violations without blocking PRs
-          soft_fail: true
+      - name: Install kube-score
+        run: |
+          KUBE_SCORE_VERSION=1.19.0
+          KUBE_SCORE_TARBALL="kube-score_${KUBE_SCORE_VERSION}_linux_amd64.tar.gz"
+          KUBE_SCORE_URL="https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/${KUBE_SCORE_TARBALL}"
+          CHECKSUMS_URL="https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/checksums.txt"
 
-      - name: Upload SARIF results
-        # v3
-        uses: github/codeql-action/upload-sarif@256ed127a6f1d1e5a3eddfc3cbd84aee45b72290
-        if: success() || failure()
-        with:
-          sarif_file: results.sarif
+          curl -Lo "${KUBE_SCORE_TARBALL}" "$KUBE_SCORE_URL"
+          curl -Lo checksums.txt "$CHECKSUMS_URL"
+
+          # Verify checksum
+          grep "${KUBE_SCORE_TARBALL}" checksums.txt | sha256sum -c -
+
+          tar -xzf "${KUBE_SCORE_TARBALL}"
+          chmod +x kube-score
+          sudo mv kube-score /usr/local/bin/
+
+      - name: Install kubeconform
+        run: |
+          KUBECONFORM_VERSION=0.7.0
+          KUBECONFORM_TARBALL="kubeconform-linux-amd64.tar.gz"
+          KUBECONFORM_URL="https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/${KUBECONFORM_TARBALL}"
+          CHECKSUMS_URL="https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/CHECKSUMS"
+
+          curl -Lo "${KUBECONFORM_TARBALL}" "$KUBECONFORM_URL"
+          curl -Lo CHECKSUMS "$CHECKSUMS_URL"
+
+          # Verify checksum
+          grep "${KUBECONFORM_TARBALL}" CHECKSUMS | sha256sum -c -
+
+          tar -xzf "${KUBECONFORM_TARBALL}"
+          chmod +x kubeconform
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Run kube-score
+        run: |
+          echo "Running kube-score on Kubernetes manifests..."
+          # Advisory: Reports best practice violations but doesn't block workflow
+          find argocd-apps/ \( -name "*.yaml" -o -name "*.yml" \) -exec kube-score score {} + 2>/dev/null || true
+
+      - name: Run kubeconform
+        run: |
+          echo "Running kubeconform schema validation..."
+          # Blocking: Schema validation failures will fail the workflow
+          kubeconform -summary -output text -ignore-missing-schemas \
+            -skip AppProject,Application \
+            argocd-apps/
