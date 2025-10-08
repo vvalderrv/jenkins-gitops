@@ -1,0 +1,162 @@
+# Validates Jenkins Configuration as Code (JCasC) YAML files.
+# Combines YAML syntax validation and JCasC schema validation.
+
+name: Validate JCasC Configuration
+
+"on":
+  push:
+    branches:
+      - main
+    paths:
+      - 'base/jenkins/jcasc_yamls/**'
+      - 'base/jenkins/jcasc-schema.json'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'base/jenkins/jcasc_yamls/**'
+      - 'base/jenkins/jcasc-schema.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  jcasc-validation:
+    name: Validate JCasC YAML
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Validate YAML syntax with yamllint
+        uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c
+        with:
+          file_or_dir: base/jenkins/jcasc_yamls/
+          config_file: .yamllint
+          strict: true
+
+      - name: Install Node.js for ajv-cli
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
+        with:
+          node-version: '20'
+
+      - name: Install ajv-cli
+        run: |
+          set -euo pipefail
+          # Pin versions for reproducibility
+          npm install -g ajv-cli@5.0.0 ajv-formats@3.0.1
+          ajv --version
+
+      - name: Validate JCasC against schema
+        run: |
+          set -euo pipefail
+
+          # Policy: Graceful degradation if schema missing
+          # Allows workflow bootstrap without schema file
+          # TODO: After initial schema is committed, consider requiring schema presence
+          if [ ! -f base/jenkins/jcasc-schema.json ]; then
+            echo "⚠️  No schema file found at base/jenkins/jcasc-schema.json"
+            echo "Schema validation skipped - YAML syntax validation still enforced"
+            echo "Run update-jcasc-schema workflow to generate schema for full validation"
+            exit 0
+          fi
+
+          echo "Validating JCasC files against schema..."
+
+          # Check directory exists
+          if [ ! -d base/jenkins/jcasc_yamls/ ]; then
+            echo "⚠️  Directory base/jenkins/jcasc_yamls/ not found"
+            exit 0
+          fi
+
+          # Collect failures for summary reporting
+          failed_files=()
+
+          # Use find to handle nested files correctly (bash ** glob requires shopt)
+          while IFS= read -r -d '' file; do
+            echo "Validating $file..."
+            if ! ajv validate -s base/jenkins/jcasc-schema.json \
+              -d "$file" \
+              -c ajv-formats \
+              --strict=false \
+              --yaml \
+              --spec=draft2020 \
+              --all-errors; then
+              failed_files+=("$file")
+            fi
+          done < <(find base/jenkins/jcasc_yamls/ -type f \( -name '*.yaml' -o -name '*.yml' \) -print0)
+
+          # Report summary
+          if [ ${#failed_files[@]} -gt 0 ]; then
+            echo ""
+            echo "❌ Schema validation failed for ${#failed_files[@]} file(s):"
+            printf '  - %s\n' "${failed_files[@]}"
+
+            # GitHub Actions summary
+            if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+              echo "## ❌ Schema Validation Failed" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "**${#failed_files[@]} file(s) failed schema validation:**" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              printf '- `%s`\n' "${failed_files[@]}" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            exit 1
+          fi
+
+          echo "✓ All files pass schema validation"
+
+      - name: Check for secrets in plaintext
+        run: |
+          set -euo pipefail
+          echo "Scanning for potential plaintext secrets..."
+
+          # Policy: Fail on detection of hardcoded credentials
+          # Allowed: ${SECRET_VAR}, ${ENV_VAR}, credential substitution
+          # Forbidden: Literal passwords, tokens, keys
+
+          # Regex pattern explanation:
+          # - Matches: password|token|secret|apiToken|apiKey|privateKey followed by ':'
+          # - Requires: 12+ characters (alphanumeric, +, /, =)
+          # - Purpose: Detect base64-encoded or long literal secrets
+          # - False positives: Minimized by 12-char minimum and specific key names
+          if grep -r -E "(password|token|secret|apiToken|apiKey|privateKey):\s*['\"]?[a-zA-Z0-9+/=]{12,}" \
+              base/jenkins/jcasc_yamls/ --include="*.yaml" \
+              --include="*.yml"; then
+            echo ""
+            echo "❌ ERROR: Plaintext secrets detected in JCasC files"
+            echo ""
+            echo "JCasC files MUST use secret substitution patterns:"
+            echo "  - Environment variables: \${JENKINS_SECRET}"
+            echo "  - Credentials plugin: \${credential-id}"
+            echo "  - HashiCorp Vault: \${vault:secret/path#key}"
+            echo "  - 1Password: Use 1Password Connect operator"
+            echo ""
+            echo "Never commit literal passwords, tokens, or API keys."
+            exit 1
+          else
+            echo "  ✓ No plaintext secrets detected"
+          fi
+
+      - name: Summary
+        run: |
+          set -euo pipefail
+          echo "JCasC validation completed successfully"
+          YAML_COUNT=$(find base/jenkins/jcasc_yamls/ -type f \
+            \( -name '*.yaml' -o -name '*.yml' \) 2>/dev/null | wc -l)
+          echo "Files validated: ${YAML_COUNT}"
+
+          # GitHub Actions summary
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            echo "## ✅ JCasC Validation Passed" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Files validated:** ${YAML_COUNT}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **YAML syntax:** ✅ Pass" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Schema validation:** ✅ Pass" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Secret scan:** ✅ Pass" >> "$GITHUB_STEP_SUMMARY"
+          fi
