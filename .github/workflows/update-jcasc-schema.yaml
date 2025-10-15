@@ -1,0 +1,320 @@
+# Updates JCasC JSON Schema from live Jenkins instance.
+# Fetches schema and creates PR for review before merge.
+# Run manually after Jenkins upgrades or plugin updates.
+#
+# Outputs:
+#   schema-sha256: SHA256 hash of fetched schema
+#   schema-size: Size in bytes of fetched schema
+#   pr-number: PR number if created
+#   pr-url: PR URL if created
+#   artifact-id: Artifact ID for downloaded schema
+#   changed: Whether schema changed (true/false)
+#
+# Requirements:
+#   - Repository retention policy must support 30-day artifacts
+#   - GITHUB_TOKEN with contents:write, pull-requests:write, issues:write
+#   - JENKINS_API_TOKEN secret: API token for Jenkins admin user
+#   - Jenkins URL must use HTTPS with valid TLS certificate
+
+---
+name: Update JCasC Schema
+
+"on":
+  workflow_dispatch:
+    inputs:
+      jenkins_url:
+        description: 'Jenkins URL to fetch schema from'
+        required: true
+        default: 'https://jenkins-staging.example.com'
+      jenkins_username:
+        description: 'Jenkins username (admin user with schema access)'
+        required: true
+        default: 'automation-user'
+      force_update:
+        description: 'Force update even if schema unchanged'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: ${{ github.repository }}/jcasc-schema-updater
+  cancel-in-progress: true
+
+jobs:
+  update-schema:
+    name: Fetch and Update JCasC Schema
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      schema-sha256: ${{ steps.fetch-schema.outputs.sha256 }}
+      schema-size: ${{ steps.fetch-schema.outputs.size }}
+      pr-number: ${{ steps.create-pr.outputs.pull-request-number }}
+      pr-url: ${{ steps.create-pr.outputs.pull-request-url }}
+      artifact-id: ${{ steps.upload-artifact.outputs.artifact-id }}
+      changed: ${{ steps.check-changes.outputs.changed }}
+    env:
+      SCHEMA_FILE: base/jenkins/jcasc-schema.json
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set Jenkins URL
+        id: jenkins-url
+        run: |
+          set -euo pipefail
+          JENKINS_URL="${{ inputs.jenkins_url }}"
+
+          # Validate URL uses HTTPS protocol (defense in depth)
+          if ! [[ "$JENKINS_URL" =~ ^https:// ]]; then
+            echo "::error::Jenkins URL must use HTTPS protocol (got: ${JENKINS_URL})"
+            exit 1
+          fi
+
+          # Normalize URL (remove trailing slash)
+          JENKINS_URL="${JENKINS_URL%/}"
+          printf 'url=%s\n' "$JENKINS_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch JCasC schema from Jenkins
+        id: fetch-schema
+        env:
+          JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Fetch JSON Schema from Jenkins Configuration as Code plugin
+          # Schema endpoint: <jenkins-url>/configuration-as-code/schema
+          # Used by validate-jcasc.yaml for validation of JCasC YAML files
+          # Requires Jenkins admin authentication (see jenkinsci/configuration-as-code-plugin docs)
+
+          # Validate API token is present
+          if [ -z "${JENKINS_API_TOKEN}" ]; then
+            echo "::error::JENKINS_API_TOKEN secret is not set"
+            echo "Create an API token in Jenkins and add it to repository secrets"
+            exit 1
+          fi
+
+          SCHEMA_URL="${{ steps.jenkins-url.outputs.url }}/configuration-as-code/schema"
+          echo "Fetching schema from: ${SCHEMA_URL}"
+
+          # Ensure target directory exists
+          mkdir -p "$(dirname "${SCHEMA_FILE}")"
+
+          # Fetch schema with timeout and retry (strict transport: HTTPS only, TLS 1.2+)
+          # Note: If Jenkins uses custom CA, install cert on runner instead of using --insecure
+          #       Example: sudo cp custom-ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
+          curl -fsSL \
+            --proto '=https' \
+            --tlsv1.2 \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 5 \
+            --retry-delay 2 \
+            --retry-all-errors \
+            -u "${{ inputs.jenkins_username }}:${JENKINS_API_TOKEN}" \
+            -H 'Accept: application/schema+json, application/json' \
+            -H 'User-Agent: GitOps-Jenkins-Schema-Updater/1.0' \
+            -o "${SCHEMA_FILE}" \
+            -w '%{content_type}' \
+            "${SCHEMA_URL}" > /tmp/content_type.txt
+
+          # Validate Content-Type header (defense against HTML error pages)
+          CONTENT_TYPE=$(cat /tmp/content_type.txt)
+          if [[ ! "$CONTENT_TYPE" =~ ^application/(json|schema\+json) ]]; then
+            echo "Error: Invalid Content-Type: ${CONTENT_TYPE} (expected application/json or application/schema+json)"
+            echo "Response is likely an error page, not a valid schema"
+            exit 1
+          fi
+
+          # Validate fetched schema is valid JSON
+          if ! python3 -c "import json; json.load(open('${SCHEMA_FILE}'))"; then
+            echo "Error: Fetched schema is not valid JSON"
+            exit 1
+          fi
+
+          # Check minimum size (schema should be >5KB to ensure valid content, not error page)
+          SIZE=$(stat -c%s "${SCHEMA_FILE}")
+          MIN_SIZE=5120
+          if [ "$SIZE" -lt "$MIN_SIZE" ]; then
+            echo "Error: Schema file too small ($SIZE bytes), likely an error response"
+            exit 1
+          fi
+
+          # Defensive schema sanity check (non-blocking warning)
+          python3 - <<'PYEOF'
+          import json
+          import sys
+          import os
+
+          schema_file = os.environ.get('SCHEMA_FILE', 'base/jenkins/jcasc-schema.json')
+          try:
+              with open(schema_file) as f:
+                  schema = json.load(f)
+              if not isinstance(schema, dict):
+                  print("Warning: Schema is not a JSON object. Continuing anyway.", file=sys.stderr)
+              elif "$schema" not in schema:
+                  print("Warning: Schema missing $schema key. Continuing anyway.", file=sys.stderr)
+          except Exception as e:
+              print(f"Warning: Schema sanity check failed: {e}. Continuing anyway.", file=sys.stderr)
+          PYEOF
+
+          echo "Schema fetched successfully"
+          printf 'size=%s\n' "$SIZE" >> "$GITHUB_OUTPUT"
+
+          # Calculate SHA256 hash for integrity verification
+          SHA256=$(sha256sum "${SCHEMA_FILE}" | awk '{print $1}')
+          printf 'sha256=%s\n' "$SHA256" >> "$GITHUB_OUTPUT"
+
+          # Compare against previous schema hash if file exists in git
+          if git ls-files --error-unmatch -- "${SCHEMA_FILE}" >/dev/null 2>&1; then
+            PREV_SHA256=$(git show HEAD:"${SCHEMA_FILE}" 2>/dev/null | sha256sum | awk '{print $1}')
+            if [ -n "$PREV_SHA256" ] && [ "$SHA256" != "$PREV_SHA256" ]; then
+              echo "::warning::Schema hash changed - Previous: ${PREV_SHA256}, New: ${SHA256}"
+              echo "Review changes carefully for unexpected modifications"
+            elif [ "$SHA256" = "$PREV_SHA256" ]; then
+              echo "Schema hash unchanged: ${SHA256}"
+            fi
+          fi
+
+      - name: Check for schema changes
+        id: check-changes
+        run: |
+          set -euo pipefail
+
+          # Check if file exists in git (tracked) or is new
+          if ! git ls-files --error-unmatch -- "${SCHEMA_FILE}" >/dev/null 2>&1; then
+            printf 'changed=%s\n' "true" >> "$GITHUB_OUTPUT"
+            printf 'diffstat=%s\n' "new file" >> "$GITHUB_OUTPUT"
+            echo "New schema file created (not tracked in git)"
+          elif git diff --quiet -- "${SCHEMA_FILE}"; then
+            printf 'changed=%s\n' "false" >> "$GITHUB_OUTPUT"
+            printf 'diffstat=%s\n' "no changes" >> "$GITHUB_OUTPUT"
+            echo "No schema changes detected"
+          else
+            printf 'changed=%s\n' "true" >> "$GITHUB_OUTPUT"
+            # Get diffstat comparing HEAD (committed) vs working tree (current)
+            if ! DIFFSTAT=$(git diff HEAD --shortstat -- "${SCHEMA_FILE}" 2>&1); then
+              echo "Warning: git diff failed: ${DIFFSTAT}"
+              DIFFSTAT="changes detected (diff failed)"
+            fi
+            printf 'diffstat=%s\n' "$DIFFSTAT" >> "$GITHUB_OUTPUT"
+            echo "Schema changes detected"
+          fi
+
+      - name: Upload schema artifact
+        id: upload-artifact
+        if: steps.fetch-schema.outcome == 'success'
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: jcasc-schema
+          path: ${{ env.SCHEMA_FILE }}
+          retention-days: 30
+          compression-level: 6
+
+      - name: Create Pull Request
+        id: create-pr
+        if: |
+          steps.check-changes.outputs.changed == 'true' ||
+          inputs.force_update == true
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            chore(schema): update JCasC schema
+
+            - Source: ${{ steps.jenkins-url.outputs.url }}
+            - Size: ${{ steps.fetch-schema.outputs.size }} bytes
+            - SHA256: ${{ steps.fetch-schema.outputs.sha256 }}
+
+            Auto-generated by update-jcasc-schema workflow
+          title: 'chore(schema): update JCasC schema'
+          body: |
+            ## JCasC Schema Update
+
+            This PR updates the JCasC JSON Schema fetched from Jenkins.
+
+            **Source:** ${{ steps.jenkins-url.outputs.url }}
+            **Schema size:** ${{ steps.fetch-schema.outputs.size }} bytes
+            **SHA256:** `${{ steps.fetch-schema.outputs.sha256 }}`
+            **Changes:** ${{ steps.check-changes.outputs.diffstat }}
+            **Triggered by:** ${{ github.event_name }}
+
+            ### Review Checklist
+            - [ ] Schema changes are expected
+            - [ ] Validation workflow passes
+            - [ ] No breaking changes to existing JCasC configs
+
+            **Note:** This PR is auto-generated. Review carefully.
+          branch: bot/jcasc-schema
+          base: ${{ github.event.repository.default_branch }}
+          delete-branch: true
+          add-paths: |
+            base/jenkins/jcasc-schema.json
+          labels: |
+            schema-update
+            automated
+
+      - name: Summary
+        if: always()
+        run: |
+          set -euo pipefail
+          echo "## JCasC Schema Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check if workflow failed early
+          if [ "${{ steps.fetch-schema.outcome }}" != "success" ]; then
+            echo "❌ **Workflow failed during schema fetch**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check logs for details." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          CHANGED="${{ steps.check-changes.outputs.changed }}"
+          FORCE="${{ inputs.force_update }}"
+          if [ "$CHANGED" = "true" ] || [ "$FORCE" = "true" ]; then
+            # SHA256 hash already calculated in fetch-schema step
+            SHA256="${{ steps.fetch-schema.outputs.sha256 }}"
+
+            # Diffstat already calculated in check-changes step
+            DIFFSTAT="${{ steps.check-changes.outputs.diffstat }}"
+
+            # Check if PR was actually created/updated
+            PR_NUMBER="${{ steps.create-pr.outputs.pull-request-number }}"
+            PR_OPERATION="${{ steps.create-pr.outputs.pull-request-operation }}"
+            PR_URL="${{ steps.create-pr.outputs.pull-request-url }}"
+
+            # Determine message based on PR outputs
+            if [ -n "$PR_NUMBER" ]; then
+              if [ "$PR_OPERATION" = "created" ]; then
+                MESSAGE="✅ **PR #${PR_NUMBER} created**"
+              elif [ "$PR_OPERATION" = "updated" ]; then
+                MESSAGE="✅ **PR #${PR_NUMBER} updated**"
+              else
+                MESSAGE="✅ **PR #${PR_NUMBER} processed**"
+              fi
+            else
+              MESSAGE="ℹ️ **No PR created (no git changes to commit)**"
+            fi
+
+            echo "${MESSAGE}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Source:** ${{ steps.jenkins-url.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Size:** ${{ steps.fetch-schema.outputs.size }} bytes" >> $GITHUB_STEP_SUMMARY
+            echo "- **SHA256:** \`${SHA256}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **Changes:** ${DIFFSTAT}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Branch:** bot/jcasc-schema" >> $GITHUB_STEP_SUMMARY
+            if [ -n "$PR_URL" ]; then
+              echo "- **PR:** ${PR_URL}" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "ℹ️ **No schema changes detected**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "PR creation skipped - schema unchanged from repository." >> $GITHUB_STEP_SUMMARY
+          fi
