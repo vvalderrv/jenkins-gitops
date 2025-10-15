@@ -121,7 +121,6 @@ jenkins:
             authorizationStrategy:
               globalMatrix:
                 permissions:
-                  - "Overall/Administer:authenticated"
                   - "Overall/Read:anonymous"
                   - "Job/Read:anonymous"
                   - "View/Read:anonymous"
