@@ -312,6 +312,25 @@ jenkins:
                         directEntry:
                           privateKey: "${OPENSEARCH_EC2_PRIVATE_KEY}"
 
+                  # S3 Bucket Configuration for Artifact Storage
+                  - string:
+                      scope: GLOBAL
+                      id: "s3-bucket-name"
+                      secret: "artifacts.s3.staging.opensearch.org"
+                      description: "S3 bucket name for staging artifacts"
+
+                  - string:
+                      scope: GLOBAL
+                      id: "s3-account-id"
+                      secret: "156041419073"
+                      description: "AWS account ID for S3 access"
+
+                  - string:
+                      scope: GLOBAL
+                      id: "s3-region"
+                      secret: "us-west-2"
+                      description: "AWS region for S3 bucket"
+
         unclassified-config: |
           unclassified:
             # GitHub plugin configuration
