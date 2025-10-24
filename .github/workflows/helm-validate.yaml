@@ -78,4 +78,6 @@ jobs:
           curl -Lo "${KUBECONFORM_TARBALL}" "${KUBECONFORM_URL}"
           echo "${KUBECONFORM_SHA256}  ${KUBECONFORM_TARBALL}" | sha256sum -c -
           tar -xzf "${KUBECONFORM_TARBALL}"
-          ./kubeconform -strict -summary rendered-${{ matrix.env }}.yaml
+          # Skip ExternalSecret CRD validation - schemas not available in kubeconform
+          # ExternalSecret resources are validated by external-secrets-operator at runtime
+          ./kubeconform -strict -summary -skip-kinds ExternalSecret rendered-${{ matrix.env }}.yaml
