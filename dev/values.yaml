@@ -53,6 +53,7 @@ jenkinsEnvVars:
   JCASC_MAVEN_OPTS: ""
   JCASC_ARTIFACTS_RETENTION_DAYS: ""
   JCASC_ECR_REGISTRY_URL: ""
+  JCASC_WORKFLOW_TEST: "pr-validation"
 
   # WARNING: Dev-only. Set this in your local env or via a Secret.
   JCASC_ADMIN_PASSWORD: ""
