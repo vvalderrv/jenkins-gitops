@@ -1,4 +1,4 @@
-# Validates Helm charts for Jenkins deployment across environments.
+# Validates Helm charts for Jenkins deployment across all environments.
 # Combines helm lint, template rendering, and kubeconform schema validation.
 
 name: Validate Helm Charts and Values
