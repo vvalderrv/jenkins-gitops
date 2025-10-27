@@ -80,4 +80,4 @@ jobs:
           tar -xzf "${KUBECONFORM_TARBALL}"
           # Skip ExternalSecret CRD validation - schemas not available in kubeconform
           # ExternalSecret resources are validated by external-secrets-operator at runtime
-          ./kubeconform -strict -summary -skip-kinds ExternalSecret rendered-${{ matrix.env }}.yaml
+          ./kubeconform -strict -summary -skip ExternalSecret -kubernetes-version 1.33.5 rendered-${{ matrix.env }}.yaml

@@ -12,6 +12,7 @@
 #   2. Modify jenkinsJavaOpts to adjust JVM settings
 #   3. Populate jenkinsEnvVars for Dev-specific JCASC variables
 #   4. Open a PR; once merged, Argo CD will deploy the updates
+# Test: Verify kubeconform workflow fix
 
 controller:
   image:
