@@ -117,13 +117,21 @@ jenkins:
                 logoutUrl: "${SAML_LOGOUT_URL}"
                 maximumAuthenticationLifetime: 86400
 
-            # Authorization strategy - allow anonymous read access
+            # Authorization Strategy: Global Matrix Authorization
+            # Admin access: lf-releng, lf-sysops groups from LF LDAP
+            # Anonymous access: read-only for public CI transparency
             authorizationStrategy:
               globalMatrix:
                 permissions:
-                  - "Overall/Read:anonymous"
-                  - "Job/Read:anonymous"
-                  - "View/Read:anonymous"
+                  # Anonymous read-only access
+                  - "USER:Overall/Read:anonymous"
+                  - "USER:Job/Discover:anonymous"
+                  - "USER:Job/Read:anonymous"
+                  - "USER:View/Read:anonymous"
+
+                  # Admin groups (LF teams)
+                  - "GROUP:Overall/Administer:lf-releng"
+                  - "GROUP:Overall/Administer:lf-sysops"
 
             # Kubernetes cloud configuration for dynamic build agents
             clouds:
