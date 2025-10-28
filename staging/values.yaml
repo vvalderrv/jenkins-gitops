@@ -133,6 +133,14 @@ jenkins:
                   - "GROUP:Overall/Administer:lf-releng"
                   - "GROUP:Overall/Administer:lf-sysops"
 
+                  # OpenSearch maintainers (staging only)
+                  - "GROUP:Job/Build:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Job/Cancel:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Job/Discover:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Job/Read:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Run/Replay:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Run/Update:opensearch-github-opensearch-maintainers"
+
             # Kubernetes cloud configuration for dynamic build agents
             clouds:
               - kubernetes:
