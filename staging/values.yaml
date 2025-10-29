@@ -136,7 +136,11 @@ jenkins:
                   # OpenSearch maintainers (staging only)
                   - "GROUP:Job/Build:opensearch-github-opensearch-maintainers"
                   - "GROUP:Job/Cancel:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Job/Configure:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Job/Create:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Job/Delete:opensearch-github-opensearch-maintainers"
                   - "GROUP:Job/Discover:opensearch-github-opensearch-maintainers"
+                  - "GROUP:Job/Move:opensearch-github-opensearch-maintainers"
                   - "GROUP:Job/Read:opensearch-github-opensearch-maintainers"
                   - "GROUP:Run/Replay:opensearch-github-opensearch-maintainers"
                   - "GROUP:Run/Update:opensearch-github-opensearch-maintainers"
