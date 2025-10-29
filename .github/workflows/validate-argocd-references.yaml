@@ -8,20 +8,12 @@ on:
     paths:
       - 'argocd-apps/**/*.yaml'
       - 'argocd-apps/**/*.yml'
-      - 'base/**'
-      - 'dev/**'
-      - 'staging/**'
-      - 'production/**'
   push:
     branches:
       - main
     paths:
       - 'argocd-apps/**/*.yaml'
       - 'argocd-apps/**/*.yml'
-      - 'base/**'
-      - 'dev/**'
-      - 'staging/**'
-      - 'production/**'
   workflow_dispatch:
 
 permissions:
