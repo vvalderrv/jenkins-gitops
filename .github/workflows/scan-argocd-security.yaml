@@ -9,7 +9,6 @@ on:
       - 'argocd-apps/**/*.yaml'
       - 'argocd-apps/**/*.yml'
       - 'base/**'
-      - 'dev/**'
       - 'staging/**'
       - 'production/**'
   push:
@@ -19,7 +18,6 @@ on:
       - 'argocd-apps/**/*.yaml'
       - 'argocd-apps/**/*.yml'
       - 'base/**'
-      - 'dev/**'
       - 'staging/**'
       - 'production/**'
   workflow_dispatch:

@@ -11,7 +11,6 @@ name: Validate Helm Charts and Values
       - 'base/jenkins/**'
       - 'staging/**'
       - 'production/**'
-      - 'dev/**'
   pull_request:
     branches:
       - main
@@ -19,7 +18,6 @@ name: Validate Helm Charts and Values
       - 'base/jenkins/**'
       - 'staging/**'
       - 'production/**'
-      - 'dev/**'
 
 permissions:
   contents: read
@@ -29,14 +27,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  helm-validate:
-    name: Validate Helm - ${{ matrix.env }}
+  detect-changes:
+    name: Detect Changed Environments
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      staging: ${{ steps.filter.outputs.staging }}
+      production: ${{ steps.filter.outputs.production }}
+      base: ${{ steps.filter.outputs.base }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Check for changed files
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+        id: filter
+        with:
+          filters: |
+            staging:
+              - 'staging/**'
+            production:
+              - 'production/**'
+            base:
+              - 'base/jenkins/**'
+
+  helm-validate-staging:
+    name: Validate Helm - staging
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    strategy:
-      matrix:
-        env: [dev, staging, production]
-
+    needs: detect-changes
+    if: needs.detect-changes.outputs.staging == 'true' || needs.detect-changes.outputs.base == 'true'
     steps:
       - name: Checkout repo
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -57,15 +77,15 @@ jobs:
       - name: Lint Helm chart
         run: |
           helm lint base/jenkins \
-            -f ${{ matrix.env }}/values.yaml
+            -f staging/values.yaml
 
-      - name: Template with values.yaml (${{ matrix.env }})
+      - name: Template with values.yaml (staging)
         run: |
           helm template jenkins base/jenkins \
-            -f ${{ matrix.env }}/values.yaml > rendered-${{ matrix.env }}.yaml
+            -f staging/values.yaml > rendered-staging.yaml
 
       - name: Show rendered output
-        run: cat rendered-${{ matrix.env }}.yaml
+        run: cat rendered-staging.yaml
 
       - name: Validate rendered manifest with kubeconform
         run: |
@@ -80,4 +100,55 @@ jobs:
           tar -xzf "${KUBECONFORM_TARBALL}"
           # Skip ExternalSecret CRD validation - schemas not available in kubeconform
           # ExternalSecret resources are validated by external-secrets-operator at runtime
-          ./kubeconform -strict -summary -skip ExternalSecret -kubernetes-version 1.33.5 rendered-${{ matrix.env }}.yaml
+          ./kubeconform -strict -summary -skip ExternalSecret -kubernetes-version 1.33.5 rendered-staging.yaml
+
+  helm-validate-production:
+    name: Validate Helm - production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: detect-changes
+    if: needs.detect-changes.outputs.production == 'true' || needs.detect-changes.outputs.base == 'true'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Install Helm
+        uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814
+        with:
+          version: v3.19.0
+
+      - name: Add Jenkins Helm repository
+        run: helm repo add jenkins https://charts.jenkins.io
+
+      - name: Build Helm dependencies
+        run: |
+          cd base/jenkins
+          helm dependency build
+
+      - name: Lint Helm chart
+        run: |
+          helm lint base/jenkins \
+            -f production/values.yaml
+
+      - name: Template with values.yaml (production)
+        run: |
+          helm template jenkins base/jenkins \
+            -f production/values.yaml > rendered-production.yaml
+
+      - name: Show rendered output
+        run: cat rendered-production.yaml
+
+      - name: Validate rendered manifest with kubeconform
+        run: |
+          KUBECONFORM_VERSION=0.7.0
+          KUBECONFORM_TARBALL="kubeconform-linux-amd64.tar.gz"
+          KUBECONFORM_URL="https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/${KUBECONFORM_TARBALL}"
+          # https://github.com/yannh/kubeconform/releases/download/v0.7.0/kubeconform-linux-amd64.tar.gz
+          KUBECONFORM_SHA256="c31518ddd122663b3f3aa874cfe8178cb0988de944f29c74a0b9260920d115d3"
+
+          curl -Lo "${KUBECONFORM_TARBALL}" "${KUBECONFORM_URL}"
+          echo "${KUBECONFORM_SHA256}  ${KUBECONFORM_TARBALL}" | sha256sum -c -
+          tar -xzf "${KUBECONFORM_TARBALL}"
+          # Skip ExternalSecret CRD validation - schemas not available in kubeconform
+          # ExternalSecret resources are validated by external-secrets-operator at runtime
+          ./kubeconform -strict -summary -skip ExternalSecret -kubernetes-version 1.33.5 rendered-production.yaml
