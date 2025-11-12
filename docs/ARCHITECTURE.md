@@ -104,6 +104,7 @@ jenkins-gitops/
 │   │   │   ├── 04-credentials.yaml
 │   │   │   └── 05-managed-files.yaml
 │   │   └── templates/         # Kubernetes resource templates
+├── build/                     # Docker image build (Dockerfile, plugins.txt)
 ├── staging/                   # Staging environment overrides
 │   └── values.yaml
 └── production/                # Production environment overrides
@@ -164,7 +165,19 @@ Jenkins Configuration as Code files that define all Jenkins settings declarative
 
 **Pattern:** Environment variables (`JCASC_*`) allow environment-specific values without changing JCasC files.
 
-### 5. Environment Overlays (`staging/`, `production/`)
+### 5. Custom Image Build (`build/`)
+
+Defines the custom Jenkins controller image with pre-installed plugins.
+
+**Components:**
+- `Dockerfile` - Custom Jenkins image definition
+- `plugins.txt` - List of Jenkins plugins to pre-install
+
+**Purpose:** Creates a customized Jenkins image with required plugins baked in, reducing startup time and ensuring consistent plugin versions across deployments.
+
+**Pattern:** The custom image is built separately and referenced by tag in environment-specific `values.yaml` files. Staging typically uses newer tags for validation before promoting to production.
+
+### 6. Environment Overlays (`staging/`, `production/`)
 
 Environment-specific Helm value overrides.
 
@@ -321,14 +334,14 @@ graph TD
 | **Package Manager** | Helm | Templating and deployment |
 | **Jenkins Chart** | jenkins/jenkins | Official Jenkins Helm chart (version in `base/jenkins/Chart.yaml`) |
 | **Configuration** | JCasC | Declarative Jenkins config |
-| **Secrets Management** | 1Password Connect | External secrets injection |
+| **Secrets Management** | External Secrets Operator | External secrets injection |
 
 ## Security Considerations
 
 ### Secrets Management
 
 - **Never commit secrets to Git**
-- Use external secret operators (1Password Connect, External Secrets Operator)
+- Use external secret operators (External Secrets Operator or similar)
 - Inject secrets as environment variables or mounted volumes
 - JCasC credentials reference secret values from environment variables
 - Rotate secrets regularly and audit access
