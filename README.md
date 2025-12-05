@@ -25,9 +25,8 @@ Git serves as the single source of truth. Manual cluster changes are automatical
 | Document | Description | Audience |
 |----------|-------------|----------|
 | [Architecture](docs/ARCHITECTURE.md) | System architecture, components, design patterns, and security | Engineers, Architects |
-| Getting Started *(coming soon)* | Prerequisites, setup, and first deployment | New users, Consumers |
-| Operations *(coming soon)* | Day-to-day operations, monitoring, troubleshooting | SRE, Operations |
-| Migration *(coming soon)* | Migrating from legacy Jenkins deployments | Release Engineers |
+| [Deployment](docs/DEPLOYMENT.md) | Deployment procedures, workflows, monitoring, and troubleshooting | Release Engineers, SRE |
+| [Configuration](docs/CONFIGURATION.md) | Configuration hierarchy, Helm values, and JCasC integration | Engineers, Operators |
 
 ## Repository Structure
 
