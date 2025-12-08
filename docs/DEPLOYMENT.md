@@ -261,7 +261,7 @@ kubectl create secret generic my-secret --from-literal=key=value  # Not in 1Pass
 - Violates compliance and security requirements
 
 **Correct Approach:**
-1. Make changes in Git repository (`dev/values.yaml`, `staging/values.yaml`, `production/values.yaml`)
+1. Make changes in Git repository (`staging/values.yaml`, `production/values.yaml`)
 2. Commit and push to GitHub
 3. ArgoCD syncs automatically within 3 minutes
 4. Verify with read-only commands above
@@ -434,8 +434,8 @@ kubectl apply -f argocd-apps/jenkins-project.yaml
 ```
 
 This creates a Project with:
-- Allowed source repositories: `https://github.com/lfit/jenkins-gitops`, `https://github.com/lfit/releng-global-jjb`
-- Permitted namespaces: `jenkins-dev`, `jenkins-staging`, `jenkins-prod`
+- Allowed source repositories: `https://github.com/lfit/jenkins-gitops`
+- Permitted namespaces: `jenkins-staging`, `jenkins-prod`
 - Resource whitelist: Namespace creation (cluster-scoped), all resources within namespaces
 
 **Reference:** `argocd-apps/jenkins-project.yaml`
@@ -749,7 +749,6 @@ docker push ghcr.io/lfit/jenkins:test-tag
 **Image Tag Format:**
 - Production images: `main-{short_sha}` (e.g., `main-990a6cc`)
 - Staging images: `main-{short_sha}` (auto-updated)
-- Test images: Custom tags for development
 
 #### Staging Deployment (Automated)
 
