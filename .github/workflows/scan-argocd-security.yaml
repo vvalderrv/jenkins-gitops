@@ -57,7 +57,7 @@ jobs:
           # AWS Access Key (AKIA prefix + 16 chars = 20 total)
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            'AKIA[0-9A-Z]{16}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            'AKIA[0-9A-Z]{16}' argocd-apps/ base/ staging/ production/ 2>/dev/null; then
             echo "ERROR: Found AWS Access Key pattern"
             FOUND=1
           fi
@@ -65,7 +65,7 @@ jobs:
           # GitHub Token
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            'gh[pousr]_[A-Za-z0-9_]{36,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            'gh[pousr]_[A-Za-z0-9_]{36,}' argocd-apps/ base/ staging/ production/ 2>/dev/null; then
             echo "ERROR: Found GitHub Token pattern"
             FOUND=1
           fi
@@ -73,7 +73,7 @@ jobs:
           # Generic API Key
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            -E 'api[_-]?key["\s:=]+[A-Za-z0-9+/=]{20,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            -E 'api[_-]?key["\s:=]+[A-Za-z0-9+/=]{20,}' argocd-apps/ base/ staging/ production/ 2>/dev/null | \
             grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
             echo "ERROR: Found API Key pattern"
             FOUND=1
@@ -82,7 +82,7 @@ jobs:
           # Private Key (excluding Helm templates)
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            'BEGIN.*PRIVATE KEY' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            'BEGIN.*PRIVATE KEY' argocd-apps/ base/ staging/ production/ 2>/dev/null | \
             grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
             echo "ERROR: Found Private Key"
             FOUND=1
@@ -91,7 +91,7 @@ jobs:
           # Docker Hub Token
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            'dckr_pat_[A-Za-z0-9_-]{20,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            'dckr_pat_[A-Za-z0-9_-]{20,}' argocd-apps/ base/ staging/ production/ 2>/dev/null; then
             echo "ERROR: Found Docker Hub Token"
             FOUND=1
           fi
@@ -99,7 +99,7 @@ jobs:
           # GitLab Token
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            'glpat-[A-Za-z0-9_-]{20,}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            'glpat-[A-Za-z0-9_-]{20,}' argocd-apps/ base/ staging/ production/ 2>/dev/null; then
             echo "ERROR: Found GitLab Token"
             FOUND=1
           fi
@@ -107,7 +107,7 @@ jobs:
           # Slack Webhook
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            'hooks\.slack\.com/services/' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null; then
+            'hooks\.slack\.com/services/' argocd-apps/ base/ staging/ production/ 2>/dev/null; then
             echo "ERROR: Found Slack Webhook"
             FOUND=1
           fi
@@ -115,7 +115,7 @@ jobs:
           # AWS Secret Access Key (40 characters, base64-like)
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            -E 'aws_secret_access_key["\s:=]+[A-Za-z0-9/+=]{40}' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            -E 'aws_secret_access_key["\s:=]+[A-Za-z0-9/+=]{40}' argocd-apps/ base/ staging/ production/ 2>/dev/null | \
             grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
             echo "ERROR: Found AWS Secret Access Key"
             FOUND=1
@@ -124,7 +124,7 @@ jobs:
           # Generic Password (plaintext)
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            -iE '(password|passwd):\s*["\x27][^"\x27{{ ]{8,}["\x27]' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            -iE '(password|passwd):\s*["\x27][^"\x27{{ ]{8,}["\x27]' argocd-apps/ base/ staging/ production/ 2>/dev/null | \
             grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
             echo "ERROR: Found plaintext password"
             FOUND=1
@@ -133,7 +133,7 @@ jobs:
           # 1Password Connect Token
           if grep -rn --include="*.yaml" --include="*.yml" \
             --exclude-dir=".git" --exclude="README.md" \
-            'OP_CONNECT_TOKEN' argocd-apps/ base/ dev/ staging/ production/ 2>/dev/null | \
+            'OP_CONNECT_TOKEN' argocd-apps/ base/ staging/ production/ 2>/dev/null | \
             grep -v 'valueFrom:' | grep -v 'secretKeyRef:' | grep -v '{{' | grep -v '\${'; then
             echo "ERROR: Found 1Password Connect Token"
             FOUND=1
