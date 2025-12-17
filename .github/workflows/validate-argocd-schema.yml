@@ -8,12 +8,14 @@ on:
     paths:
       - 'argocd-apps/**/*.yaml'
       - 'argocd-apps/**/*.yml'
+      - 'root-app.yaml'
   push:
     branches:
       - main
     paths:
       - 'argocd-apps/**/*.yaml'
       - 'argocd-apps/**/*.yml'
+      - 'root-app.yaml'
   workflow_dispatch:
 
 permissions:
@@ -62,5 +64,5 @@ jobs:
             -kubernetes-version ${K8S_SCHEMA_VERSION} \
             -schema-location default \
             -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-            argocd-apps/
-          echo "✅ kubeconform validation passed for argocd-apps/ (k8s=${K8S_SCHEMA_VERSION})" >> "$GITHUB_STEP_SUMMARY"
+            argocd-apps/ root-app.yaml
+          echo "✅ kubeconform validation passed for argocd-apps/ and root-app.yaml (k8s=${K8S_SCHEMA_VERSION})" >> "$GITHUB_STEP_SUMMARY"
