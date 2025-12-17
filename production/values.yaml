@@ -308,15 +308,17 @@ jenkins:
                 - name: "Default"
                   home: "git"
 
-    # Resource allocation for production environment
-    # Higher resource limits appropriate for production workloads
+    # Resource allocation for production environment. Matches size of previous
+    # c5.9xlarge controller instance (36 cpu, 72GB mem), slightly downscaled to
+    # account for Kubernetes's cut of node resources.
+    # (https://github.com/opensearch-project/opensearch-ci/blob/1.5.0/lib/compute/jenkins-main-node.ts#L121)
     resources:
       requests:
-        cpu: "2000m"
-        memory: "4Gi"
+        cpu: 34
+        memory: '68Gi'
       limits:
-        cpu: "4000m"
-        memory: "8Gi"
+        cpu: 36
+        memory: '70Gi'
 
     # JVM optimization for production environment
     # Memory settings aligned with resource limits above
@@ -326,14 +328,14 @@ jenkins:
       -XX:+ParallelRefProcEnabled
       -XX:+DisableExplicitGC
       -XX:+UnlockExperimentalVMOptions
+      -XX:+ExplicitGCInvokesConcurrent
       -XX:G1NewSizePercent=20
       -XX:+UnlockDiagnosticVMOptions
       -XX:G1MixedGCCountTarget=16
       -XX:G1MixedGCLiveThresholdPercent=90
       -XX:G1RSetUpdatingPauseTimePercent=5
-      -XX:G1HeapRegionSize=32M
-      -Xmx6g
-      -XX:MaxMetaspaceSize=512m
+      -Xms25g
+      -Xmx50g
 
     # Environment variables for Jenkins container (JCasC configuration)
     # Variables consumed by: base/jenkins/jcasc_yamls/ configuration files
@@ -452,4 +454,4 @@ jenkins:
   persistence:
     enabled: true
     storageClass: "auto-ebs-sc"
-    size: "16Gi"
+    size: "100Gi"
