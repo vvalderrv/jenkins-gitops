@@ -525,17 +525,6 @@ jenkins:
         hosts:
         - jenkins-stag.opensearch.cluster.linuxfound.info
 
-  # Defining resource requests and limits for the staging environment.
-  resources:
-    requests:
-      cpu: "1000m"
-      memory: "2Gi"
-    limits:
-      cpu: "2000m"
-      memory: "4Gi"
-
-  jenkinsJavaOpts: "-Xms1g -Xmx2g"
-
   persistence:
     enabled: true
     storageClass: "auto-ebs-sc"
