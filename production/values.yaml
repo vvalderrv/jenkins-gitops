@@ -449,17 +449,6 @@ jenkins:
           hosts:
             - jenkins.opensearch.cluster.linuxfound.info
 
-  # Defining resource requests and limits for the production environment.
-  resources:
-    requests:
-      cpu: "2000m"
-      memory: "4Gi"
-    limits:
-      cpu: "4000m"
-      memory: "8Gi"
-
-  jenkinsJavaOpts: "-Xms2g -Xmx6g"
-
   persistence:
     enabled: true
     storageClass: "auto-ebs-sc"
