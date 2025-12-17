@@ -334,8 +334,8 @@ jenkins:
       -XX:G1MixedGCCountTarget=16
       -XX:G1MixedGCLiveThresholdPercent=90
       -XX:G1RSetUpdatingPauseTimePercent=5
-      -Xms25g
-      -Xmx50g
+      -Xms4g
+      -Xmx16g
 
     # Environment variables for Jenkins container (JCasC configuration)
     # Variables consumed by: base/jenkins/jcasc_yamls/ configuration files
