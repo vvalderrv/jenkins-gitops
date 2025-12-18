@@ -1,3 +1,9 @@
+# Workflow: Validates Jenkins plugins.txt file for syntax and installability
+#
+# Triggers: PR or push to main affecting build/plugins.txt
+# Validates: Plugin format syntax and successful plugin installation test
+# Dependencies: Docker, jenkins/jenkins image, jenkins-plugin-cli
+
 name: Validate Jenkins Plugins
 
 on:

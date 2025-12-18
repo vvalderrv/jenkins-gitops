@@ -1,5 +1,8 @@
-# Validates Jenkins Configuration as Code (JCasC) YAML files.
-# Combines YAML syntax validation and JCasC schema validation.
+# Workflow: Validates Jenkins Configuration as Code (JCasC) YAML files
+#
+# Triggers: PR or push to main affecting base/jenkins/jcasc_yamls/ or jcasc-schema.json
+# Validates: YAML syntax (yamllint) and JCasC schema compliance (ajv-cli)
+# Dependencies: action-yamllint, Node.js, ajv-cli, ajv-formats
 
 name: Validate JCasC Configuration
 
