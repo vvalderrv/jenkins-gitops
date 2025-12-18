@@ -1,5 +1,8 @@
-# Validates Dockerfile for Jenkins image build.
-# Combines Hadolint linting, build testing, base image currency check, and security enforcement.
+# Workflow: Validates Dockerfile for Jenkins custom image build
+#
+# Triggers: PR or push to main affecting build/Dockerfile or build/plugins.txt
+# Validates: Dockerfile lint (Hadolint), build test, base image currency, non-root user
+# Dependencies: Hadolint, Docker
 
 name: Validate Dockerfile
 
