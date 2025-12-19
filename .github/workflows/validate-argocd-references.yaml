@@ -1,5 +1,8 @@
-# Validates referential integrity of ArgoCD Application manifests.
-# Checks that repos, branches, paths, and valueFiles exist before deployment.
+# Workflow: Validates referential integrity of ArgoCD Application manifests
+#
+# Triggers: PR or push to main affecting argocd-apps/
+# Validates: Source paths, Helm valueFiles, destination namespaces
+# Dependencies: yq
 
 name: Validate ArgoCD References
 

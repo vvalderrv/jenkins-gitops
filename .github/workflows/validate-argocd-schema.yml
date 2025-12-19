@@ -1,5 +1,8 @@
-# Validates ArgoCD Application and AppProject manifests against their
-# schema definitions.
+# Workflow: Validates ArgoCD Application and AppProject manifests against CRD schemas
+#
+# Triggers: PR or push to main affecting argocd-apps/ or root-app.yaml
+# Validates: YAML syntax and ArgoCD CRD schema compliance
+# Dependencies: kubeconform, datreeio CRDs catalog
 
 name: Validate ArgoCD Schema
 

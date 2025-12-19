@@ -1,4 +1,8 @@
-# Validates YAML syntax for ArgoCD application manifests in argocd-apps
+# Workflow: Validates YAML syntax for ArgoCD application manifests
+#
+# Triggers: PR or push to main affecting argocd-apps/
+# Validates: YAML syntax compliance
+# Dependencies: Python, yamllint
 
 name: Lint ArgoCD YAML
 
